@@ -1,0 +1,30 @@
+плейлисты:
+
+http://8tracks.com/explore/database
+http://playlists.net/
+http://groovesharks.org/
+
+датасет last.fm (и не только):
+
+http://labrosa.ee.columbia.edu/millionsong/lastfm
+
+поиск оригинальной версии по каверу:
+
+http://www.whosampled.com/
+
+табы:
+
+https://www.ultimate-guitar.com/
+http://hm6.ru/
+
+тексты:
+
+http://www.azlyrics.com/
+http://www.lyricsfreak.com/
+http://www.metrolyrics.com/
+
+ноты:
+https://musescore.com/
+https://www.onlinepianist.com/sheets/
+http://www.musiclassroom.com
+http://www.8notes.com/all/rock_and_pop/sheet_music/
