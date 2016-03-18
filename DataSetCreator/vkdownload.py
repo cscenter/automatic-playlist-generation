@@ -1,18 +1,8 @@
 # encoding: utf-8
 import shutil
 import urllib.request
-from functools import wraps
 from itertools import cycle
-
-
-def coroutine(gen):
-    @wraps(gen)
-    def inner(*args, **kwargs):
-        g = gen(*args, **kwargs)
-        next(g)
-        return g
-
-    return inner
+from parsers import coroutine
 
 
 @coroutine

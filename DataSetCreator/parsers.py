@@ -1,4 +1,7 @@
-import eyed3
+from mutagen.ID3 import ID3
+from functools import wraps
+
+STOP = object()
 
 
 def coroutine(gen):
@@ -12,43 +15,55 @@ def coroutine(gen):
 
 
 @coroutine
-def echo_nest_update(json_data):
+def echo_nest_update():
     """
-    Updates the json with all EchoNest data available for this song
-    :param json_data: json object to update """
-    pass
+    Updates the json with all EchoNest data available for this song """
+    while True:
+        json_data = yield
+        if json_data == STOP:
+            break
 
 
 @coroutine
-def essentia_update(json_data):
+def essentia_update():
     """
-    Updates the json with all Essentia data available for this song
-    :param json_data: json object to update """
-    pass
+    Updates the json with all Essentia data available for this song """
+    while True:
+        json_data = yield
+        if json_data == STOP:
+            break
 
 
 @coroutine
-def last_fm_update(json_data):
+def last_fm_update():
     """
-    Updates the json with all Last.FM data available for this song
-    :param json_data: json object to update """
-    pass
+    Updates the json with all Last.FM data available for this song """
+    while True:
+        json_data = yield
+        if json_data == STOP:
+            break
 
 
 @coroutine
-def lyrics_update(json_data):
+def lyrics_update():
     """
     TODO: update the json_data object with lyrics
     something like this:
-    json_data[...] = get_lyrics(json_data['id'])
-    :param json_data: json object to update """
-    pass
+    json_data[...] = get_lyrics(json_data['id']) """
+    while True:
+        json_data = yield
+        if json_data == STOP:
+            break
 
 
 @coroutine
-def id3_v2_update(json_data):
+def id3_v2_update():
     """
     Updates the json with all ID3v2 tags available for this song
-    import eyed3 required
-    :param json_data: json object to update """
-    pass
+    mutagen package required """
+    while True:
+        json_data = yield
+        if json_data == STOP:
+            break
+        tags = ID3(json_data['path'])
+        print(tags)
