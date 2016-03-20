@@ -8,7 +8,7 @@ class AbstractDataProvider:
     def get_all(self):
         assert False
 
-    def save_data(self, json_data):
+    def save_data(self):
         assert False
 
     def get_by_id(self, song_id):
@@ -18,18 +18,25 @@ class AbstractDataProvider:
 class HardDriveProvider(AbstractDataProvider):
     def __init__(self, p):
         self.path = p
-        self.data = {}
+        if os.path.exists(self._get_data_file_path()):
+            self.data = json.load(self._get_data_file_path())
+        else:
+            self.data = {}
+            for root, _, files in os.walk(self.path):
+                for filename in files:
+                    file_path = os.path.join(root, filename)
+                    file_json = {'path': file_path}
+                    self.data[file_path] = file_json
+
+    def _get_data_file_path(self):
+        return os.path.join(self.path, 'data.json')
 
     def get_all(self):
-        for root, _, files in os.walk(self.path):
-            for filename in files:
-                file_path = os.path.join(root, filename)
-                file_json = {}
-                self.data[file_path] = json.dumps(file_json)
-        return json.dumps(self.data)
+        return self.data
 
-    def save_data(self, json_data):
-        pass
+    def save_data(self):
+        with open(self._get_data_file_path(), 'w') as writer:
+            writer.write(json.dumps(self.data))
 
     def get_by_id(self, song_path):
         return self.data.get(song_path, None)
@@ -52,7 +59,7 @@ class MongoDBProvider(AbstractDataProvider):
         print(list(collection.find()))
         connection.close()
 
-    def save_data(self, json_data):
+    def save_data(self):
         pass
 
     def get_by_id(self, song_id):

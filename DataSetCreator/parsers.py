@@ -1,4 +1,4 @@
-from mutagen.ID3 import ID3
+from mutagen.id3 import ID3, ID3NoHeaderError
 from functools import wraps
 
 STOP = object()
@@ -22,6 +22,7 @@ def echo_nest_update():
         json_data = yield
         if json_data == STOP:
             break
+        json_data['echo_nest'] = []
 
 
 @coroutine
@@ -32,6 +33,7 @@ def essentia_update():
         json_data = yield
         if json_data == STOP:
             break
+        json_data['essentia'] = []
 
 
 @coroutine
@@ -42,6 +44,7 @@ def last_fm_update():
         json_data = yield
         if json_data == STOP:
             break
+        json_data['lastfm'] = []
 
 
 @coroutine
@@ -54,6 +57,7 @@ def lyrics_update():
         json_data = yield
         if json_data == STOP:
             break
+        json_data['lyrics'] = []
 
 
 @coroutine
@@ -65,5 +69,22 @@ def id3_v2_update():
         json_data = yield
         if json_data == STOP:
             break
-        tags = ID3(json_data['path'])
-        print(tags)
+
+        json_data['id3'] = {}
+        try:
+            tags = ID3(json_data['path'])
+            for t in tags:
+                if 'PRIV' not in t and t not in ['TIT2', 'TPE1', 'TALB',
+                                                 'TDRC', 'TCON', 'TRCK',
+                                                 'TLEN']:
+                    print(t, tags[t])
+            json_data['id3']['title'] = tags.get('TIT2', "")
+            json_data['id3']['artist'] = tags.get('TPE1', "")
+            json_data['id3']['album'] = tags.get('TALB', "")
+            json_data['id3']['year'] = tags.get('TDRC', "")
+            json_data['id3']['genre'] = tags.get('TCON', "")
+            json_data['id3']['track number'] = tags.get('TRCK', "")
+            json_data['id3']['length'] = tags.get('TLEN', "")
+
+        except ID3NoHeaderError:
+            pass
