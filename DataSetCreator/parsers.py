@@ -76,15 +76,29 @@ def id3_v2_update():
             for t in tags:
                 if 'PRIV' not in t and t not in ['TIT2', 'TPE1', 'TALB',
                                                  'TDRC', 'TCON', 'TRCK',
-                                                 'TLEN']:
+                                                 'TLEN', 'TIT1', 'TPE2',
+                                                 'TPE3', 'TPE4', 'TCOM',
+                                                 'TEXT', 'USLT']:
                     print(t, tags[t])
-            json_data['id3']['title'] = tags.get('TIT2', "")
-            json_data['id3']['artist'] = tags.get('TPE1', "")
-            json_data['id3']['album'] = tags.get('TALB', "")
-            json_data['id3']['year'] = tags.get('TDRC', "")
-            json_data['id3']['genre'] = tags.get('TCON', "")
-            json_data['id3']['track number'] = tags.get('TRCK', "")
-            json_data['id3']['length'] = tags.get('TLEN', "")
+
+            def get_tag_or_default(tag):
+                return ','.join(map(str, tags[tag].text))\
+                    if tag in tags else ""
+
+            json_data['id3']['genre2'] = get_tag_or_default('TIT1')
+            json_data['id3']['title'] = get_tag_or_default('TIT2')
+            json_data['id3']['artist'] = get_tag_or_default('TPE1')
+            json_data['id3']['composer'] = get_tag_or_default('TCOM')
+            json_data['id3']['text_writer'] = get_tag_or_default('TEXT')
+            json_data['id3']['artist2'] = get_tag_or_default('TPE2')
+            json_data['id3']['artist3'] = get_tag_or_default('TPE3')
+            json_data['id3']['artist4'] = get_tag_or_default('TPE4')
+            json_data['id3']['album'] = get_tag_or_default('TALB')
+            json_data['id3']['year'] = get_tag_or_default('TDRC')
+            json_data['id3']['genre'] = get_tag_or_default('TCON')
+            json_data['id3']['track number'] = get_tag_or_default('TRCK')
+            json_data['id3']['length'] = get_tag_or_default('TLEN')
+            json_data['id3']['lyrics'] = get_tag_or_default('USLT')
 
         except ID3NoHeaderError:
             pass

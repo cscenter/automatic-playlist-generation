@@ -20,8 +20,6 @@ dp = HardDriveProvider('VkDataset #1')
 for song in dp.get_all():
     song_data = dp.get_by_id(song)
     all_parsers.send(song_data)
-    print(song_data)
-    stop()
 
 try:
     all_parsers.send(STOP)

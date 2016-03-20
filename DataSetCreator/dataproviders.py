@@ -19,7 +19,8 @@ class HardDriveProvider(AbstractDataProvider):
     def __init__(self, p):
         self.path = p
         if os.path.exists(self._get_data_file_path()):
-            self.data = json.load(self._get_data_file_path())
+            with open(self._get_data_file_path()) as r:
+                self.data = json.load(r)
         else:
             self.data = {}
             for root, _, files in os.walk(self.path):
