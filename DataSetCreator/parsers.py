@@ -82,8 +82,8 @@ def last_fm_update():
                             artist.get_wiki_content()
                         json_data['lastfm']['artistwikisumm'] =\
                             artist.get_wiki_summary()
-                except pylast.WSError:
-                    pass
+                except pylast.WSError as e:
+                    print(e.details)
             time.sleep(1)
             if album_title and artist_name:
                 try:
@@ -100,8 +100,8 @@ def last_fm_update():
                             album.get_wiki_content()
                         json_data['lastfm']['albumwikisumm'] =\
                             album.get_wiki_summary()
-                except pylast.WSError:
-                    pass
+                except pylast.WSError as e:
+                    print(e.details)
             time.sleep(1)
             if title and artist_name:
                 try:
@@ -134,8 +134,8 @@ def last_fm_update():
                             time.sleep(1)
                         json_data['lastfm']['tracksimtags'] =\
                             [t[0].get_name() for t in similar_tags]
-                except pylast.WSError:
-                    pass
+                except pylast.WSError as e:
+                    print(e.details)
         except pylast.NetworkError:
             continue
 
