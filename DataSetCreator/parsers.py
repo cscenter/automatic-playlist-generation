@@ -40,6 +40,36 @@ def echo_nest_update():
         if json_data['echo_nest']:
             continue
         json_data['echo_nest'] = {}
+        """
+        Artist
+        http://developer.echonest.com/docs/v4/artist.html
+get_biographies
+get_blogs
+get_familiarity
+get_hotttnesss
+get_news
+get_reviews
+get_similar
+get_terms
+get_urls
+get_doc_counts
+similar
+        Playlist
+        http://developer.echonest.com/docs/v4/playlisting.html
+basic
+        Song
+        http://developer.echonest.com/docs/v4/song.html
+get_audio_summary
+get_song_hotttnesss
+get_artist_familiarity
+get_song_discovery
+get_song_currency
+        Track
+get_analysis + track_from_filename
+
+EchoNestException
+
+        """
 
 
 @coroutine
