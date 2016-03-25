@@ -2,6 +2,7 @@
 import pylast
 import pyechonest
 import time
+# from essentia.standard import *
 from functools import wraps
 from mutagen.id3 import ID3, ID3NoHeaderError
 from passwords import *
@@ -43,11 +44,97 @@ def echo_nest_update():
 def essentia_update():
     """
     Updates the json with all Essentia data available for this song """
-    while True:
-        json_data = yield
-        if json_data == STOP:
-            break
-        json_data['essentia'] = {}
+    pass
+    # w = Windowing(type='blackman-harris')
+    # fft = FFT()
+    # extractors = {
+    #     'mfcc': MFCC(),
+    #     'dct': DCT(),
+    #     'envelope': Envelope(),
+    #     'peakdetection': PeakDetection(),
+    #     'replaygain': ReplayGain(),
+    #     'autocorrelation': AutoCorrelation(),
+    #     'mean': Mean(),
+    #     'geometricmean': GeometricMean(),
+    #     'powermean': PowerMean(),
+    #     'median': Median(),
+    #     'energy': Energy()
+    #     'rms': RMS(),
+    #     'centralmoments': CentralMoments(),
+    #     'rawmoments': RawMoments(),
+    #     'variance': Variance(),
+    #     'skewness': Skewness(),
+    #     'kurtosis': Kurtosis(),
+    #     'flatness': Flatness(),
+    #     'crest': Crest(),
+    #     'instantpower': InstantPower(),
+    #     'iir': IIR(),
+    #     'lowpass': LowPass(),
+    #     'bandpass': BandPass(),
+    #     'highpass': HighPass(),
+    #     'bandreject': BandReject(),
+    #     'equalloudness': EqualLoudness(),
+    #     'barkbands': BarkBands(),
+    #     'melbands': MelBands(),
+    #     'erbbands': ERBBands(),
+    #     'mfcc': MFCC(),
+    #     'gfcc': GFCC(),
+    #     'lpc': LPC(),
+    #     'hfc': HFC(),
+    #     'spectralcontrast': SpectralContrast(),
+    #     'inharmonicity': Inharmonicity(),
+    #     'dissonance': Dissonance(),
+    #     'spectralwhitening': SpectralWhitening(),
+    #     'panning': Panning(),
+    #     'zcr': ZCR(),
+    #     'leq': Leq(),
+    #     'larm': LARM(),
+    #     'loudness': Loudness(),
+    #     'loudnessvicker': LoudnessVicker(),
+    #     'pitchsaliencefunction': PitchSalienceFunction(),
+    #     'predominantmelody': PredominantMelody(),
+    #     'pitchyinfft': PitchYinFFT(),
+    #     'hpcp': HPCP(),
+    #     'tuningfrequency': TuningFrequency(),
+    #     'key': Key(),
+    #     'chordsdetection': ChordsDetection(),
+    #     'chordsdescriptors': ChordsDescriptors(),
+    #     'beattrackerdegara': BeatTrackerDegara(),
+    #     'beattrackermultifeature': BeatTrackerMultiFeature(),
+    #     'rhythmextractor2013': RhythmExtractor2013(),
+    #     'bpmhistogramdescriptors': BpmHistogramDescriptors(),
+    #     'noveltycurve': NoveltyCurve(),
+    #     'onsetdetection': OnsetDetection(),
+    #     'onsetdetectionglobal': OnsetDetectionGlobal(),
+    #     'onsets': Onsets(),
+    #     'rhythmtransform': RhythmTransform(),
+    #     'beatsloudness': BeatsLoudness(),
+    #     'logattacktime': LogAttackTime(),
+    #     'maxtototal': MaxToTotal(),
+    #     'mintototal': MinToTotal(),
+    #     'pitchsalience': PitchSalience(),
+    #     'tctototal': TCToTotal(),
+    #     'danceability': Danceability(),
+    #     'dynamiccomplexity': DynamicComplexity(),
+    #     'fadedetection': FadeDetection(),
+    #     'sbic': SBic(),
+    #     'pca': PCA()
+    # }
+    #
+    # while True:
+    #     json_data = yield
+    #     if json_data == STOP:
+    #         break
+    #     json_data['essentia'] = {}
+    #     try:
+    #         loader = MonoLoader(filename=json_data['path'])
+    #         audio = loader()
+    #         for frame in FrameGenerator(audio, frameSize=1024, hopSize=512):
+    #             filtered = fft(w(frame))
+    #             for extr in extractors:
+    #                 json_data['essentia'][extr] = extractors[extr](filtered)
+    #     except:
+    #         pass
 
 
 @coroutine
