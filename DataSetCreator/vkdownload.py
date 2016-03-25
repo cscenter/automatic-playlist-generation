@@ -2,6 +2,8 @@
 import shutil
 import urllib.request
 from itertools import cycle
+from urllib.error import HTTPError
+
 from parsers import coroutine
 
 
@@ -9,16 +11,19 @@ from parsers import coroutine
 def download_mp3():
     while True:
         url = (yield)[7:]
-        with urllib.request.urlopen(url) as response:
-            file_name = url.split('/')[-1].split('?')[0]
-            with open(file_name, 'wb') as out_file:
-                shutil.copyfileobj(response, out_file)
-                print(file_name)
+        try:
+            with urllib.request.urlopen(url) as response:
+                file_name = url.split('/')[-1].split('?')[0]
+                with open(file_name, 'wb') as out_file:
+                    shutil.copyfileobj(response, out_file)
+                    print(file_name)
+        except HTTPError:
+            continue
 
 queue = cycle([download_mp3(), download_mp3(),
                download_mp3(), download_mp3()])
 
-with open('audios4935.html') as audio:
+with open('audios4360861.html') as audio:
     for line in audio:
         ind = line.find('value="http')
         while ind >= 0:
