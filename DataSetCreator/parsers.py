@@ -123,12 +123,12 @@ def last_fm_update():
 @coroutine
 def librosa_update():
     """
-    Updates the json with all Last.FM data available for this song """
+    Updates the json with all Librosa data available for this song """
     while True:
         json_data = yield
         if json_data == STOP:
             break
-        json_data['librosa'] = []
+        json_data['librosa'] = {}
 
 
 @coroutine
@@ -141,7 +141,7 @@ def lyrics_update():
         json_data = yield
         if json_data == STOP:
             break
-        json_data['lyrics'] = []
+        json_data['lyrics'] = {}
 
 
 @coroutine
