@@ -2,3 +2,4 @@ DataSetCreator/.idea/
 DataSetCreator/VkDataset*
 DataSetCreator/__pycache__/
 .idea/
+DataSetCreator/passwords.py
