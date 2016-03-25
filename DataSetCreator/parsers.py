@@ -83,7 +83,7 @@ def last_fm_update():
                         json_data['lastfm']['artistwikisumm'] =\
                             artist.get_wiki_summary()
                 except pylast.WSError as e:
-                    print(e.details)
+                    print(e)
             time.sleep(1)
             if album_title and artist_name:
                 try:
@@ -101,7 +101,7 @@ def last_fm_update():
                         json_data['lastfm']['albumwikisumm'] =\
                             album.get_wiki_summary()
                 except pylast.WSError as e:
-                    print(e.details)
+                    print(e)
             time.sleep(1)
             if title and artist_name:
                 try:
@@ -125,17 +125,20 @@ def last_fm_update():
                         similar_tags = set()
                         for chunk in chunks(sim_tracks, 5):
                             for sim_track in chunk:
-                                similar_track = network.get_track(
-                                    sim_track[0].get_artist(),
-                                    sim_track[0].get_name())
-                                if similar_track:
-                                    for tt in similar_track.get_top_tags():
-                                        similar_tags.add(tt)
+                                try:
+                                    similar_track = network.get_track(
+                                        sim_track[0].get_artist(),
+                                        sim_track[0].get_name())
+                                    if similar_track:
+                                        for tt in similar_track.get_top_tags():
+                                            similar_tags.add(tt)
+                                except pylast.WSError as e:
+                                    print(e)
                             time.sleep(1)
                         json_data['lastfm']['tracksimtags'] =\
                             [t[0].get_name() for t in similar_tags]
                 except pylast.WSError as e:
-                    print(e.details)
+                    print(e)
         except pylast.NetworkError:
             continue
 
