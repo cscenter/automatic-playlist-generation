@@ -1,4 +1,4 @@
-import librosa
+# import librosa
 import pylast
 import pyechonest
 import time
