@@ -37,6 +37,8 @@ def echo_nest_update():
         json_data = yield
         if json_data == STOP:
             break
+        if json_data['echo_nest']:
+            continue
         json_data['echo_nest'] = {}
 
 
@@ -125,6 +127,8 @@ def essentia_update():
     #     json_data = yield
     #     if json_data == STOP:
     #         break
+    #     if json_data['essentia']:
+    #         continue
     #     json_data['essentia'] = {}
     #     try:
     #         loader = MonoLoader(filename=json_data['path'])
@@ -151,6 +155,9 @@ def last_fm_update():
         json_data = yield
         if json_data == STOP:
             break
+        if json_data['lastfm']:
+            continue
+
         try:
             json_data['lastfm'] = {}
             title = json_data['id3'].get('title', '')
@@ -238,6 +245,8 @@ def librosa_update():
         json_data = yield
         if json_data == STOP:
             break
+        if json_data['librosa']:
+            continue
         json_data['librosa'] = {}
 
 
@@ -251,6 +260,8 @@ def lyrics_update():
         json_data = yield
         if json_data == STOP:
             break
+        if json_data['lyrics']:
+            continue
         json_data['lyrics'] = {}
 
 
@@ -264,6 +275,8 @@ def id3_v2_update():
         if json_data == STOP:
             break
 
+        if json_data['id3']:
+            continue
         json_data['id3'] = {}
         try:
             tags = ID3(json_data['path'])

@@ -26,7 +26,7 @@ for dataset_path in ['VkDataset #1', 'VkDataset #2', 'VkDataset #3',
         all_parsers.send(song_data)
         if i and not (i % 100):
             dp.save_data()
-        print(song)
+        print(i, song)
 
     try:
         all_parsers.send(STOP)
