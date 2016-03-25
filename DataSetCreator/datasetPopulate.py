@@ -1,5 +1,6 @@
 from dataproviders import HardDriveProvider
-from parsers import coroutine, id3_v2_update, last_fm_update, STOP
+from parsers import coroutine, echo_nest_update, id3_v2_update,\
+    last_fm_update, librosa_update, STOP
 
 
 @coroutine
@@ -15,11 +16,14 @@ def broadcast(targets):
         if message == STOP:
             break
 
-all_parsers = broadcast([id3_v2_update(), last_fm_update()])
+all_parsers = broadcast([id3_v2_update(), last_fm_update(),
+                         echo_nest_update(), librosa_update()])
 dp = HardDriveProvider('VkDataset #1')
-for song in dp.get_all():
+for i, song in enumerate(dp.get_all()):
     song_data = dp.get_by_id(song)
     all_parsers.send(song_data)
+    if i and not (i % 100):
+        dp.save_data()
 
 try:
     all_parsers.send(STOP)

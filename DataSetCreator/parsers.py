@@ -1,3 +1,6 @@
+import pylast
+import pyechonest
+import librosa
 from mutagen.id3 import ID3, ID3NoHeaderError
 from functools import wraps
 
@@ -45,6 +48,17 @@ def last_fm_update():
         if json_data == STOP:
             break
         json_data['lastfm'] = []
+
+
+@coroutine
+def librosa_update():
+    """
+    Updates the json with all Last.FM data available for this song """
+    while True:
+        json_data = yield
+        if json_data == STOP:
+            break
+        json_data['librosa'] = []
 
 
 @coroutine
