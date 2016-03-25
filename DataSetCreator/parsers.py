@@ -64,60 +64,80 @@ def last_fm_update():
         json_data = yield
         if json_data == STOP:
             break
-
-        json_data['lastfm'] = {}
-        title = json_data['id3'].get('title', '')
-        artist_name = json_data['id3'].get('artist', '')
-        album_title = json_data['id3'].get('album', '')
-        if artist_name:
-            artist = network.get_artist(artist_name)
-            if artist:
-                json_data['lastfm']['artist'] = artist.get_name()
-                json_data['lastfm']['artistsimilar'] =\
-                    [a.get_name() for a in artist.get_similar()]
-                json_data['lastfm']['artisttags'] =\
-                    [t.get_name() for t in artist.get_top_tags()]
-                json_data['lastfm']['artistwiki'] = artist.get_wiki_content()
-                json_data['lastfm']['artistwikisumm'] =\
-                    artist.get_wiki_summary()
-        time.sleep(1)
-        if album_title and artist_name:
-            album = network.get_album(artist_name, album_title)
-            if album:
-                json_data['lastfm']['album'] = album.get_name()
-                json_data['lastfm']['albumlisteners'] =\
-                    album.get_listener_count()
-                json_data['lastfm']['albumplaycount'] = album.get_playcount()
-                json_data['lastfm']['albumtags'] =\
-                    [t.get_name() for t in album.get_top_tags()]
-                json_data['lastfm']['artistwiki'] = album.get_wiki_content()
-                json_data['lastfm']['albumwikisumm'] = album.get_wiki_summary()
-        time.sleep(1)
-        if title and artist_name:
-            track = network.get_track(artist_name, title)
-            if track:
-                sim_tracks = track.get_similar()
-                json_data['lastfm']['track'] = track.get_name()
-                json_data['lastfm']['tracklisteners'] =\
-                    track.get_listener_count()
-                json_data['lastfm']['trackplaycount'] = track.get_playcount()
-                json_data['lastfm']['tracktags'] =\
-                    [t.get_name() for t in track.get_top_tags()]
-                json_data['lastfm']['tracksimilar'] =\
-                    [a.get_name() for a in sim_tracks]
-                json_data['lastfm']['trackwiki'] = track.get_wiki_content()
-                json_data['lastfm']['trackwikisumm'] = track.get_wiki_summary()
-                time.sleep(1)
-                similar_tags = set()
-                for chunk in chunks(sim_tracks, 5):
-                    for sim_track in chunk:
-                        similar_track = network.get_track(
-                            sim_track.get_artist(), sim_track.get_name())
-                        if similar_track:
-                            similar_tags.add(similar_track.get_top_tags())
-                    time.sleep(1)
-                json_data['lastfm']['tracksimtags'] =\
-                    [t.get_name() for t in similar_tags]
+        try:
+            json_data['lastfm'] = {}
+            title = json_data['id3'].get('title', '')
+            artist_name = json_data['id3'].get('artist', '')
+            album_title = json_data['id3'].get('album', '')
+            if artist_name:
+                try:
+                    artist = network.get_artist(artist_name)
+                    if artist:
+                        json_data['lastfm']['artist'] = artist.get_name()
+                        json_data['lastfm']['artistsimilar'] =\
+                            [a[0].get_name() for a in artist.get_similar()]
+                        json_data['lastfm']['artisttags'] =\
+                            [t[0].get_name() for t in artist.get_top_tags()]
+                        json_data['lastfm']['artistwiki'] =\
+                            artist.get_wiki_content()
+                        json_data['lastfm']['artistwikisumm'] =\
+                            artist.get_wiki_summary()
+                except pylast.WSError:
+                    pass
+            time.sleep(1)
+            if album_title and artist_name:
+                try:
+                    album = network.get_album(artist_name, album_title)
+                    if album:
+                        json_data['lastfm']['album'] = album.get_name()
+                        json_data['lastfm']['albumlisteners'] =\
+                            album.get_listener_count()
+                        json_data['lastfm']['albumplaycount'] =\
+                            album.get_playcount()
+                        json_data['lastfm']['albumtags'] =\
+                            [t[0].get_name() for t in album.get_top_tags()]
+                        json_data['lastfm']['artistwiki'] =\
+                            album.get_wiki_content()
+                        json_data['lastfm']['albumwikisumm'] =\
+                            album.get_wiki_summary()
+                except pylast.WSError:
+                    pass
+            time.sleep(1)
+            if title and artist_name:
+                try:
+                    track = network.get_track(artist_name, title)
+                    if track:
+                        sim_tracks = track.get_similar()
+                        json_data['lastfm']['track'] = track.get_name()
+                        json_data['lastfm']['tracklisteners'] =\
+                            track.get_listener_count()
+                        json_data['lastfm']['trackplaycount'] =\
+                            track.get_playcount()
+                        json_data['lastfm']['tracktags'] =\
+                            [t[0].get_name() for t in track.get_top_tags()]
+                        json_data['lastfm']['tracksimilar'] =\
+                            [a[0].get_name() for a in sim_tracks]
+                        json_data['lastfm']['trackwiki'] =\
+                            track.get_wiki_content()
+                        json_data['lastfm']['trackwikisumm'] =\
+                            track.get_wiki_summary()
+                        time.sleep(1)
+                        similar_tags = set()
+                        for chunk in chunks(sim_tracks, 5):
+                            for sim_track in chunk:
+                                similar_track = network.get_track(
+                                    sim_track[0].get_artist(),
+                                    sim_track[0].get_name())
+                                if similar_track:
+                                    for tt in similar_track.get_top_tags():
+                                        similar_tags.add(tt)
+                            time.sleep(1)
+                        json_data['lastfm']['tracksimtags'] =\
+                            [t[0].get_name() for t in similar_tags]
+                except pylast.WSError:
+                    pass
+        except pylast.NetworkError:
+            continue
 
 
 @coroutine
