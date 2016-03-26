@@ -4,7 +4,7 @@ import pyechonest
 import time
 # from essentia.standard import *
 from functools import wraps
-from mutagen.id3 import ID3, ID3NoHeaderError
+from mutagen.id3 import ID3, ID3NoHeaderError, MutagenError
 from passwords import *
 
 STOP = object()
@@ -263,8 +263,10 @@ def last_fm_update():
                             [t[0].get_name() for t in similar_tags]
                 except pylast.WSError as e:
                     print(e)
-        except pylast.NetworkError:
-            continue
+        except pylast.NetworkError as e:
+            print(e)
+        except pylast.MalformedResponseError as e:
+            print(e)
 
 
 @coroutine
@@ -337,5 +339,5 @@ def id3_v2_update():
             json_data['id3']['length'] = get_tag_or_default('TLEN')
             json_data['id3']['lyrics'] = get_tag_or_default('USLT')
 
-        except ID3NoHeaderError:
+        except MutagenError:
             pass

@@ -16,7 +16,7 @@ def broadcast(targets):
         if message == STOP:
             break
 
-for dataset_path in ['VkDataset #2', 'VkDataset #3',
+for dataset_path in [  # 'VkDataset #2', 'VkDataset #3',
                      'VkDataset #4', 'VkDataset #5']:
     all_parsers = broadcast([id3_v2_update(), last_fm_update()])
     #                          , echo_nest_update(), librosa_update()])
