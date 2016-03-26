@@ -37,7 +37,7 @@ def echo_nest_update():
         json_data = yield
         if json_data == STOP:
             break
-        if json_data['echo_nest']:
+        if json_data.get('echo_nest', ''):
             continue
         json_data['echo_nest'] = {}
         """
@@ -157,7 +157,7 @@ def essentia_update():
     #     json_data = yield
     #     if json_data == STOP:
     #         break
-    #     if json_data['essentia']:
+    #     if json_data('essentia', ''):
     #         continue
     #     json_data['essentia'] = {}
     #     try:
@@ -185,7 +185,7 @@ def last_fm_update():
         json_data = yield
         if json_data == STOP:
             break
-        if json_data['lastfm']:
+        if json_data('lastfm', ''):
             continue
 
         try:
@@ -275,7 +275,7 @@ def librosa_update():
         json_data = yield
         if json_data == STOP:
             break
-        if json_data['librosa']:
+        if json_data('librosa', ''):
             continue
         json_data['librosa'] = {}
 
@@ -290,7 +290,7 @@ def lyrics_update():
         json_data = yield
         if json_data == STOP:
             break
-        if json_data['lyrics']:
+        if json_data('lyrics', ''):
             continue
         json_data['lyrics'] = {}
 
@@ -305,7 +305,7 @@ def id3_v2_update():
         if json_data == STOP:
             break
 
-        if json_data['id3']:
+        if json_data('id3', ''):
             continue
         json_data['id3'] = {}
         try:
