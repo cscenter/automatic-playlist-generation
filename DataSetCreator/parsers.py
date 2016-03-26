@@ -1,10 +1,10 @@
 # import librosa
 import pylast
-import pyechonest
+# import pyechonest
 import time
 # from essentia.standard import *
 from functools import wraps
-from mutagen.id3 import ID3, ID3NoHeaderError, MutagenError
+from mutagen.id3 import ID3, MutagenError
 from passwords import *
 
 STOP = object()
@@ -312,13 +312,13 @@ def id3_v2_update():
         json_data['id3'] = {}
         try:
             tags = ID3(json_data['path'])
-            for t in tags:
-                if 'PRIV' not in t and t not in ['TIT2', 'TPE1', 'TALB',
-                                                 'TDRC', 'TCON', 'TRCK',
-                                                 'TLEN', 'TIT1', 'TPE2',
-                                                 'TPE3', 'TPE4', 'TCOM',
-                                                 'TEXT', 'USLT']:
-                    print(t, tags[t])
+            # for t in tags:
+            #     if 'PRIV' not in t and t not in ['TIT2', 'TPE1', 'TALB',
+            #                                      'TDRC', 'TCON', 'TRCK',
+            #                                      'TLEN', 'TIT1', 'TPE2',
+            #                                      'TPE3', 'TPE4', 'TCOM',
+            #                                      'TEXT', 'USLT']:
+            #         print(t, tags[t])
 
             def get_tag_or_default(tag):
                 return ','.join(map(str, tags[tag].text)) \
