@@ -21,12 +21,12 @@ for dataset_path in [  # 'VkDataset #2', 'VkDataset #3',
     all_parsers = broadcast([id3_v2_update(), last_fm_update()])
     #                          , echo_nest_update(), librosa_update()])
     dp = HardDriveProvider(dataset_path)
-    for i, song in enumerate(dp.get_all()):
+    for i, song in enumerate(dp.get_all(), 1):
         song_data = dp.get_by_id(song)
         all_parsers.send(song_data)
-        if i and not (i % 100):
+        if not (i % 50):
             dp.save_data()
-        print(i, song)
+            print(i)
 
     try:
         all_parsers.send(STOP)
