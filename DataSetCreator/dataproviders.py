@@ -24,16 +24,21 @@ class HardDriveProvider(AbstractDataProvider):
         else:
             self.data = {}
             for root, _, files in os.walk(self.path):
-                for filename in files:
-                    file_path = os.path.join(root, filename)
+                for filepath in filter(self.filter_mp3, files):
+                    file_path = os.path.join(root, filepath)
                     file_json = {'path': file_path}
                     self.data[file_path] = file_json
 
     def _get_data_file_path(self):
         return os.path.join(self.path, 'data.json')
 
+    def filter_mp3(self, filepath):
+        _, file_extension = os.path.splitext(filepath)
+        return 'mp3' in file_extension
+
     def get_all(self):
-        return self.data
+        return dict((k, v) for k, v in self.data.items()
+                    if self.filter_mp3(k))
 
     def save_data(self):
         with open(self._get_data_file_path(), 'w') as writer:

@@ -341,3 +341,5 @@ def id3_v2_update():
 
         except MutagenError:
             pass
+        except FileNotFoundError:
+            pass
