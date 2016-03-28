@@ -24,9 +24,12 @@ Created by Tyler Williams on 2010-09-01
 # you might like.
 #
 
-import sys, os, logging
+import logging
+import os
+import sys
 import xml.sax.saxutils as saxutils
 from optparse import OptionParser
+
 from pyechonest import artist, playlist
 
 # set your api key here if it's not set in the environment
@@ -126,18 +129,21 @@ def lookup_seeds(seed_artist_names):
 def find_playlist(seed_artist_ids, playable=False):
     if playable:
         logger.info("finding playlist with audio...")
-        p = playlist.static(type='artist-radio', artist_id=seed_artist_ids, variety=1,
-                            buckets=['id:7digital-US', 'tracks'], limit=True)
+        p = playlist.static(type='artist-radio', artist_id=seed_artist_ids,
+                            variety=1, buckets=['id:7digital-US', 'tracks'],
+                            limit=True)
     else:
         logger.info("finding playlist without audio...")
-        p = playlist.static(type='artist-radio', artist_id=seed_artist_ids, variety=1)
+        p = playlist.static(type='artist-radio', artist_id=seed_artist_ids,
+                            variety=1)
     return p
 
 
 if __name__ == "__main__":
     usage = 'usage: %prog [options] "artist 1" "artist 2" ... "artist N"\n\n' \
             'example:\n' \
-            '\t ./%prog "arcade fire" "feist" "broken social scene" -x -f arcade_feist_scene.xspf\n' \
+            '\t ./%prog "arcade fire" "feist" "broken social scene" -x -f ' \
+            'arcade_feist_scene.xspf\n' \
             '\t ./%prog "justice" "four tet" "bitshifter" -v\n'
 
     parser = OptionParser(usage=usage)
@@ -173,7 +179,8 @@ if __name__ == "__main__":
     seed_ids = lookup_seeds(args)
 
     # find playlist
-    raw_plist = find_playlist(seed_ids, playable=(options.audio or options.xspf))
+    raw_plist = find_playlist(seed_ids,
+                              playable=(options.audio or options.xspf))
 
     tuple_plist = []
     for s in raw_plist:

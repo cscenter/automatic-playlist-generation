@@ -193,23 +193,26 @@ def last_fm_update():
             title = json_data['id3'].get('title', '')
             artist_name = json_data['id3'].get('artist', '')
             album_title = json_data['id3'].get('album', '')
-            if artist_name:
-                try:
-                    artist = network.get_artist(artist_name)
-                    if artist:
-                        json_data['lastfm']['artist'] = artist.get_name()
-                        json_data['lastfm']['artistsimilar'] =\
-                            [a[0].get_name() for a in artist.get_similar()]
-                        json_data['lastfm']['artisttags'] =\
-                            [t[0].get_name() for t in artist.get_top_tags()]
-                        json_data['lastfm']['artistwiki'] =\
-                            artist.get_wiki_content()
-                        json_data['lastfm']['artistwikisumm'] =\
-                            artist.get_wiki_summary()
-                except pylast.WSError as e:
-                    print(e)
-            time.sleep(1)
-            if album_title and artist_name:
+            if not artist_name:
+                continue
+            try:
+                artist = network.get_artist(artist_name)
+                if artist:
+                    json_data['lastfm']['artist'] = artist.get_name()
+                    json_data['lastfm']['artistsimilar'] =\
+                        [a[0].get_name() for a in artist.get_similar()]
+                    json_data['lastfm']['artisttags'] =\
+                        [t[0].get_name() for t in artist.get_top_tags()]
+                    json_data['lastfm']['artistwiki'] =\
+                        artist.get_wiki_content()
+                    json_data['lastfm']['artistwikisumm'] =\
+                        artist.get_wiki_summary()
+            except pylast.WSError as e:
+                print(e)
+            else:
+                time.sleep(1)
+
+            if album_title:
                 try:
                     album = network.get_album(artist_name, album_title)
                     if album:
@@ -226,8 +229,10 @@ def last_fm_update():
                             album.get_wiki_summary()
                 except pylast.WSError as e:
                     print(e)
-            time.sleep(1)
-            if title and artist_name:
+                else:
+                    time.sleep(1)
+
+            if title:
                 try:
                     track = network.get_track(artist_name, title)
                     if track:
@@ -312,13 +317,6 @@ def id3_v2_update():
         json_data['id3'] = {}
         try:
             tags = ID3(json_data['path'])
-            # for t in tags:
-            #     if 'PRIV' not in t and t not in ['TIT2', 'TPE1', 'TALB',
-            #                                      'TDRC', 'TCON', 'TRCK',
-            #                                      'TLEN', 'TIT1', 'TPE2',
-            #                                      'TPE3', 'TPE4', 'TCOM',
-            #                                      'TEXT', 'USLT']:
-            #         print(t, tags[t])
 
             def get_tag_or_default(tag):
                 return ','.join(map(str, tags[tag].text)) \
