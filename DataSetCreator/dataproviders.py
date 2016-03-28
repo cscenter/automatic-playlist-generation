@@ -30,7 +30,8 @@ class HardDriveProvider(AbstractDataProvider):
                     self.data[file_path] = file_json
 
     def _get_data_file_path(self):
-        return os.path.join(self.path, 'data.json')
+        return os.path.join(self.path, '{}.json'.format(
+            os.path.basename(os.path.normpath(self.path))))
 
     @staticmethod
     def filter_mp3(filepath):
