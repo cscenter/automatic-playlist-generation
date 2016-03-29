@@ -16,9 +16,8 @@ def broadcast(targets):
         if message == STOP:
             break
 
-for dataset_path in [  # 'VkDataset #2', 'VkDataset #3',
-                     'music']:
-    all_parsers = broadcast([id3_v2_update(), last_fm_update()
+for dataset_path in ['music']:
+    all_parsers = broadcast([id3_v2_update(), last_fm_update(),
                              echo_nest_update()])  # , librosa_update()])
     dp = HardDriveProvider(dataset_path)
     for i, song in enumerate(dp.get_all(), 1):
