@@ -1,6 +1,6 @@
 from dataproviders import HardDriveProvider
 from parsers import coroutine, echo_nest_update, id3_v2_update,\
-    last_fm_update, librosa_update, STOP
+    last_fm_update, STOP
 
 
 @coroutine
@@ -18,8 +18,8 @@ def broadcast(targets):
 
 for dataset_path in [  # 'VkDataset #2', 'VkDataset #3',
                      'music']:
-    all_parsers = broadcast([id3_v2_update()])  # , last_fm_update()])
-    #                          , echo_nest_update(), librosa_update()])
+    all_parsers = broadcast([id3_v2_update(), last_fm_update()
+                             echo_nest_update()])  # , librosa_update()])
     dp = HardDriveProvider(dataset_path)
     for i, song in enumerate(dp.get_all(), 1):
         song_data = dp.get_by_id(song)

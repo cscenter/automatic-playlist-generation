@@ -1,11 +1,12 @@
 # import librosa
 import pylast
-# import pyechonest
 import time
 # from essentia.standard import *
 from functools import wraps
 from mutagen.id3 import ID3, MutagenError
 from passwords import *
+from pyechonest import artist, playlist, song, track
+from pyechonest.util import EchoNestException
 
 STOP = object()
 
@@ -40,35 +41,152 @@ def echo_nest_update():
         if json_data.get('echo_nest', ''):
             continue
         json_data['echo_nest'] = {}
+        if json_data['lastfm']:
+            track_title = json_data['lastfm'].get('track', '')
+            artist_name = json_data['lastfm'].get('artist', '')
+            album_title = json_data['lastfm'].get('album', '')
+        if not track_title:
+            track_title = json_data['id3'].get('title', '')
+        if not artist_name:
+            artist_name = json_data['id3'].get('artist', '')
+        if not album_title:
+            album_title = json_data['id3'].get('album', '')
+
+        try:
+            if artist_name:
+                a = artist.Artist(artist_name,
+                                  buckets=['id', 'name', 'biographies',
+                                           'blogs', 'discovery',
+                                           'discovery_rank', 'doc_counts',
+                                           'familiarity', 'familiarity_rank',
+                                           'genre',
+                                           'hotttnesss', 'hotttnesss_rank',
+                                           'artist_location', 'news',
+                                           'reviews', 'terms', 'urls',
+                                           'years_active'])
+                json_data['echo_nest']['artist_id'] = a.id
+                json_data['echo_nest']['artist'] = a.name
+                json_data['echo_nest']['bios'] = a.biographies
+                json_data['echo_nest']['blogs'] = a.blogs
+                json_data['echo_nest']['discovery'] = a.discovery
+                json_data['echo_nest']['discovery_rank'] = a.discovery_rank
+                json_data['echo_nest']['doc_counts'] = a.doc_counts
+                json_data['echo_nest']['familiarity'] = a.familiarity
+                json_data['echo_nest']['familiarity_rank'] = a.familiarity
+                json_data['echo_nest']['hotttnesss'] = a.hotttnesss
+                json_data['echo_nest']['hotttnesss_rank'] = a.hotttnesss_rank
+                json_data['echo_nest']['location'] = a.artist_location
+                json_data['echo_nest']['news'] = a.news
+                json_data['echo_nest']['reviews'] = a.reviews
+                json_data['echo_nest']['terms'] = a.terms
+                json_data['echo_nest']['urls'] = a.urls
+                json_data['echo_nest']['years_active'] = a.years_active
+                time.sleep(1)
+                json_data['echo_nest']['similar'] = a.get_similar()
+                json_data['echo_nest']['genre'] = a.list_genres()
+        except EchoNestException as e:
+            print(e)
+        else:
+            time.sleep(1)
+
+        if artist_name or track_title:
+            try:
+                json_data['echo_nest']['basic_artist_list'] =\
+                    playlist.basic(artist=artist_name, song=track_title)
+                json_data['echo_nest']['basic_song_list'] =\
+                    playlist.basic(type='song-radio',
+                                   artist=artist_name, song=track_title)
+            except EchoNestException as e:
+                print(e)
+            else:
+                time.sleep(1)
+
+        if artist_name and track_title:
+            results = song.search(artist=artist_name, title=track_title,
+                                  limit=True, results=1)
+            if results:
+                try:
+                    json_data['echo_nest']['id'] = results[0].id
+                    json_data['echo_nest']['summary'] =\
+                        results[0].audio_summary
+                    time.sleep(1)
+                    json_data['echo_nest']['hotttnesss'] =\
+                        results[0].song_hotttnesss
+                    json_data['echo_nest']['artist_familiarity'] =\
+                        results[0].artist_familiarity
+                    time.sleep(1)
+                    json_data['echo_nest']['discovery'] =\
+                        results[0].song_discovery
+                    json_data['echo_nest']['currency'] =\
+                        results[0].song_currency
+                except EchoNestException as e:
+                    print(e)
+                else:
+                    time.sleep(1)
+
+            if json_data['echo_nest']['id']:
+                try:
+                    tr = track.track_from_id(json_data['echo_nest']['id'])
+                    tr.get_analysis()
+                    json_data['echo_nest']['analysis'] = {}
+                    json_data['echo_nest']['analysis']['acousticness'] =\
+                        tr.acousticness
+                    json_data['echo_nest']['analysis']['analysis_url'] =\
+                        tr.analysis_url
+                    json_data['echo_nest']['analysis']['danceability'] =\
+                        tr.danceability
+                    json_data['echo_nest']['analysis']['duration'] =\
+                        tr.duration
+                    json_data['echo_nest']['analysis']['energy'] = tr.energy
+                    json_data['echo_nest']['analysis']['key'] = tr.key
+                    json_data['echo_nest']['analysis']['liveness'] =\
+                        tr.liveness
+                    json_data['echo_nest']['analysis']['loudness'] =\
+                        tr.loudness
+                    json_data['echo_nest']['analysis']['mode'] = tr.mode
+                    json_data['echo_nest']['analysis']['speechiness'] =\
+                        tr.speechiness
+                    json_data['echo_nest']['analysis']['tempo'] =\
+                        tr.tempo
+                    json_data['echo_nest']['analysis']['time_signature'] =\
+                        tr.time_signature
+                    json_data['echo_nest']['analysis']['valence'] = tr.valence
+                    json_data['echo_nest']['analysis']['analysis_channels'] =\
+                        tr.analysis_channels
+                    json_data['echo_nest']['analysis']['bars'] = tr.bars
+                    json_data['echo_nest']['analysis']['beats'] = tr.beats
+                    json_data['echo_nest']['analysis']['start_of_fade_out'] =\
+                        tr.start_of_fade_out
+                    json_data['echo_nest']['analysis']['end_of_fade_in'] =\
+                        tr.end_of_fade_in
+                    json_data['echo_nest']['analysis']['key_confidence'] =\
+                        tr.key_confidence
+                    json_data['echo_nest']['analysis']['meta'] = tr.meta
+                    json_data['echo_nest']['analysis']['mode_confidence'] =\
+                        tr.mode_confidence
+                    json_data['echo_nest']['analysis']['num_samples'] =\
+                        tr.num_samples
+                    json_data['echo_nest']['analysis']['sections'] =\
+                        tr.sections
+                    json_data['echo_nest']['analysis']['segments'] =\
+                        tr.segments
+                    json_data['echo_nest']['analysis']['synchstring'] =\
+                        tr.synchstring
+                    json_data['echo_nest']['analysis']['tatums'] =\
+                        tr.tatums
+                    json_data['echo_nest']['analysis']['tempo_confidence'] =\
+                        tr.tempo_confidence
+                    json_data['echo_nest']['analysis']['sign_confidence'] =\
+                        tr.time_signature_confidence
+                except EchoNestException as e:
+                    print(e)
+                except:
+                    pass
+                else:
+                    time.sleep(1)
         """
-        Artist
-        http://developer.echonest.com/docs/v4/artist.html
-get_biographies
-get_blogs
-get_familiarity
-get_hotttnesss
-get_news
-get_reviews
-get_similar
-get_terms
-get_urls
-get_doc_counts
-similar
-        Playlist
-        http://developer.echonest.com/docs/v4/playlisting.html
-basic
-        Song
-        http://developer.echonest.com/docs/v4/song.html
-get_audio_summary
-get_song_hotttnesss
-get_artist_familiarity
-get_song_discovery
-get_song_currency
         Track
 get_analysis + track_from_filename
-
-EchoNestException
-
         """
 
 
