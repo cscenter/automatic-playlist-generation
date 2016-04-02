@@ -1,5 +1,6 @@
 # import librosa
 import pylast
+import socket
 import time
 # from essentia.standard import *
 from functools import wraps
@@ -56,6 +57,7 @@ def echo_nest_update():
 
     from pyechonest import config
     config.ECHO_NEST_API_KEY = ECHO_NEST_API_KEY
+    config.CALL_TIMEOUT = 60
     while True:
         json_data = yield
         if json_data == STOP:
@@ -76,11 +78,9 @@ def echo_nest_update():
         try:
             if artist_name:
                 a = artist.Artist(artist_name,
-                                  buckets=['name', 'biographies',
-                                           'blogs', 'discovery',
-                                           'discovery_rank', 'doc_counts',
-                                           'familiarity', 'familiarity_rank',
-                                           'genre',
+                                  buckets=['biographies', 'blogs',
+                                           'doc_counts', 'familiarity',
+                                           'familiarity_rank', 'genre',
                                            'hotttnesss', 'hotttnesss_rank',
                                            'artist_location', 'news',
                                            'reviews', 'terms', 'urls',
@@ -89,8 +89,6 @@ def echo_nest_update():
                 json_data['echo_nest']['artist'] = a.name
                 json_data['echo_nest']['bios'] = a.biographies
                 json_data['echo_nest']['blogs'] = a.blogs
-                json_data['echo_nest']['discovery'] = a.discovery
-                json_data['echo_nest']['discovery_rank'] = a.discovery_rank
                 json_data['echo_nest']['doc_counts'] = a.doc_counts
                 json_data['echo_nest']['familiarity'] = a.familiarity
                 json_data['echo_nest']['familiarity_rank'] = a.familiarity
@@ -107,6 +105,8 @@ def echo_nest_update():
                 json_data['echo_nest']['genre'] = a.list_genres()
         except EchoNestException as e:
             print(e)
+        except socket.timeout:
+            pass
         else:
             time.sleep(1)
 
@@ -119,29 +119,33 @@ def echo_nest_update():
                                    artist=artist_name, song=track_title)
             except EchoNestException as e:
                 print(e)
+            except socket.timeout:
+                pass
             else:
                 time.sleep(1)
 
         if artist_name and track_title:
             results = song.search(artist=artist_name, title=track_title,
-                                  limit=True, results=1)
+                                  buckets=['audio_summary', 'song_hotttnesss',
+                                           'artist_familiarity',
+                                           'song_discovery', 'song_currency'])
             if results:
                 try:
                     json_data['echo_nest']['id'] = results[0].id
                     json_data['echo_nest']['summary'] =\
                         results[0].audio_summary
-                    time.sleep(1)
                     json_data['echo_nest']['hotttnesss'] =\
                         results[0].song_hotttnesss
                     json_data['echo_nest']['artist_familiarity'] =\
                         results[0].artist_familiarity
-                    time.sleep(1)
                     json_data['echo_nest']['discovery'] =\
                         results[0].song_discovery
                     json_data['echo_nest']['currency'] =\
                         results[0].song_currency
                 except EchoNestException as e:
                     print(e)
+                except socket.timeout:
+                    pass
                 else:
                     time.sleep(1)
 
@@ -201,14 +205,12 @@ def echo_nest_update():
                         tr.time_signature_confidence
                 except EchoNestException as e:
                     print(e)
+                except socket.timeout:
+                    pass
                 except:
                     pass
                 else:
                     time.sleep(1)
-        """
-        Track
-get_analysis + track_from_filename
-        """
 
 
 @coroutine
