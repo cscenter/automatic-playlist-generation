@@ -33,7 +33,29 @@ def coroutine(gen):
 @coroutine
 def echo_nest_update():
     """
-    Updates the json with all EchoNest data available for this song """
+    Updates the json with all EchoNest data available for this song
+    ('Echo Nest API Error 5: bucket - Invalid parameter:
+    bucket "id" is not one of "audio", "biographies", "blogs", "doc_counts",
+    "familiarity", "familiarity_rank", "genre", "hotttnesss",
+    "hotttnesss_rank", "discovery", "discovery_rank", "images",
+    "artist_location", "news", "reviews", "songs", "terms", "urls", "video",
+    "years_active", "id:7digital-US", "id:7digital-AU", "id:7digital-UK",
+    "id:facebook", "id:fma", "id:emi_bluenote", "id:emi_artists",
+    "id:twitter", "id:spotify-WW", "id:seatwave",
+    "id:lyricfind-US", "id:jambase", "id:musixmatch-WW", "id:rdio-US",
+    "id:rdio-AT", "id:rdio-AU", "id:rdio-BR", "id:rdio-CA", "id:rdio-CH",
+    "id:rdio-DE", "id:rdio-DK", "id:rdio-ES", "id:rdio-FI", "id:rdio-FR",
+    "id:rdio-IE", "id:rdio-IT", "id:rdio-NL", "id:rdio-NO", "id:rdio-NZ",
+    "id:rdio-PT", "id:rdio-SE", "id:emi_electrospective", "id:rdio-EE",
+    "id:rdio-LT", "id:rdio-LV", "id:rdio-IS", "id:rdio-BE", "id:rdio-MX",
+    "id:seatgeek", "id:rdio-GB", "id:rdio-CZ", "id:rdio-CO", "id:rdio-PL",
+    "id:rdio-MY", "id:rdio-HK", "id:rdio-CL", "id:twitter_numeric",
+    "id:7digital-ES", "id:openaura", "id:spotify", "id:spotify-WW",
+    "id:tumblr", or "id:<CATALOG ID>"
+    """
+
+    from pyechonest import config
+    config.ECHO_NEST_API_KEY = ECHO_NEST_API_KEY
     while True:
         json_data = yield
         if json_data == STOP:
@@ -41,21 +63,20 @@ def echo_nest_update():
         if json_data.get('echo_nest', ''):
             continue
         json_data['echo_nest'] = {}
+        track_title = ''
+        artist_name = ''
         if json_data['lastfm']:
             track_title = json_data['lastfm'].get('track', '')
             artist_name = json_data['lastfm'].get('artist', '')
-            album_title = json_data['lastfm'].get('album', '')
         if not track_title:
             track_title = json_data['id3'].get('title', '')
         if not artist_name:
             artist_name = json_data['id3'].get('artist', '')
-        if not album_title:
-            album_title = json_data['id3'].get('album', '')
 
         try:
             if artist_name:
                 a = artist.Artist(artist_name,
-                                  buckets=['id', 'name', 'biographies',
+                                  buckets=['name', 'biographies',
                                            'blogs', 'discovery',
                                            'discovery_rank', 'doc_counts',
                                            'familiarity', 'familiarity_rank',
@@ -455,7 +476,7 @@ def id3_v2_update():
             json_data['id3']['length'] = get_tag_or_default('TLEN')
             json_data['id3']['lyrics'] = get_tag_or_default('USLT')
 
-        except MutagenError:
-            pass
+        except MutagenError as e:
+            print(e)
         except FileNotFoundError:
             pass

@@ -43,14 +43,14 @@ short_regex = re.compile(r'^((%s)[0-9A-Z]{16})\^?([0-9\.]+)?' % r'|'.join(n[0] f
 long_regex = re.compile(r'music://id.echonest.com/.+?/(%s)/(%s)[0-9A-Z]{16}\^?([0-9\.]+)?' % (r'|'.join(n[0] for n in TYPENAMES), r'|'.join(n[0] for n in TYPENAMES)))
 headers = [('User-Agent', 'Pyechonest %s' % (config.__version__,))]
 
-class MyBaseHandler(urllib.BaseHandler):
+class MyBaseHandler(urllib.request.BaseHandler):
     def default_open(self, request):
         if config.TRACE_API_CALLS:
             logger.info("%s" % (request.get_full_url(),))
         request.start_time = time.time()
         return None
 
-class MyErrorProcessor(urllib.HTTPErrorProcessor):
+class MyErrorProcessor(urllib.request.HTTPErrorProcessor):
     def http_response(self, request, response):
         code = response.code
         if config.TRACE_API_CALLS:
@@ -58,9 +58,9 @@ class MyErrorProcessor(urllib.HTTPErrorProcessor):
         if code/100 in (2, 4, 5):
             return response
         else:
-            urllib.HTTPErrorProcessor.http_response(self, request, response)
+            urllib.request.HTTPErrorProcessor.http_response(self, request, response)
 
-opener = urllib.build_opener(MyBaseHandler(), MyErrorProcessor())
+opener = urllib.request.build_opener(MyBaseHandler(), MyErrorProcessor())
 opener.addheaders = headers
 
 class EchoNestException(Exception):
@@ -113,7 +113,7 @@ def get_successful_response(raw_json):
         http_status = None
     raw_json = raw_json.read()
     try:
-        response_dict = json.loads(raw_json)
+        response_dict = json.loads(raw_json.decode('utf-8'))
         status_dict = response_dict['response']['status']
         code = int(status_dict['code'])
         message = status_dict['message']
