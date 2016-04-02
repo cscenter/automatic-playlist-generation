@@ -5,8 +5,8 @@ import time
 from functools import wraps
 from mutagen.id3 import ID3, MutagenError
 from passwords import *
-from pyechonest import artist, playlist, song, track
 from pyechonest.util import EchoNestException
+from pyechonest import artist, playlist, song, track
 
 STOP = object()
 
