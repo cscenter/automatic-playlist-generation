@@ -375,22 +375,22 @@ def last_fm_update():
 
             if title:
                 try:
-                    track = network.get_track(artist_name, title)
-                    if track:
-                        sim_tracks = track.get_similar()
-                        json_data['lastfm']['track'] = track.get_name()
+                    trackinfo = network.get_track(artist_name, title)
+                    if trackinfo:
+                        sim_tracks = trackinfo.get_similar()
+                        json_data['lastfm']['track'] = trackinfo.get_name()
                         json_data['lastfm']['tracklisteners'] =\
-                            track.get_listener_count()
+                            trackinfo.get_listener_count()
                         json_data['lastfm']['trackplaycount'] =\
-                            track.get_playcount()
+                            trackinfo.get_playcount()
                         json_data['lastfm']['tracktags'] =\
-                            [t[0].get_name() for t in track.get_top_tags()]
+                            [t[0].get_name() for t in trackinfo.get_top_tags()]
                         json_data['lastfm']['tracksimilar'] =\
                             [a[0].get_name() for a in sim_tracks]
                         json_data['lastfm']['trackwiki'] =\
-                            track.get_wiki_content()
+                            trackinfo.get_wiki_content()
                         json_data['lastfm']['trackwikisumm'] =\
-                            track.get_wiki_summary()
+                            trackinfo.get_wiki_summary()
                         time.sleep(1)
                         similar_tags = set()
                         for chunk in chunks(sim_tracks, 5):
