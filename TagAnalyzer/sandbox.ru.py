@@ -40,22 +40,25 @@ for song_path in dp.get_all():
         song_tags[song_path].extend(song_fm['tracksimtags'])
         song_tags[song_path].extend(song_fm['tracksimilar'])
 
-ap = [e for e in artist_plays.values()]
-plt.plot(ap)
-plt.show()
-
-tp = [e for e in track_plays.values()]
-plt.plot(range(len(track_plays)), tp)
-plt.show()
-
-trp = [e for e in track_listeners.values()]
-plt.plot(range(len(track_plays)), trp)
-plt.show()
-
 
 def show_kmeans(tests):
-    plt.plot(tests)
-    plt.show()
+    # plt.plot(tests)
+    # plt.show()
+    # plt.plot([var for (cent, var) in initial])
+    # plt.show()
+    # use vq() to get as assignment for each obs.
     initial = [cluster.vq.kmeans(tests, i) for i in range(1, 10)]
-    plt.plot([var for (cent,var) in initial])
+    cent, var = initial[2]
+    assignment, cdist = cluster.vq.vq(tests, cent)
+    plt.scatter(range(len(tests)), tests, c=assignment)
     plt.show()
+
+ap = list(map(float, artist_plays.values()))
+show_kmeans(ap)
+
+tp = list(map(float, track_plays.values()))
+show_kmeans(tp)
+
+trp = list(map(float, track_listeners.values()))
+show_kmeans(trp)
+
