@@ -457,6 +457,8 @@ def id3_v2_update():
             continue
         json_data['id3'] = {}
         try:
+            json_data['path'] = json_data['path'].replace('._', '')
+            print(json_data['path'])
             tags = ID3(json_data['path'])
 
             def get_tag_or_default(tag):

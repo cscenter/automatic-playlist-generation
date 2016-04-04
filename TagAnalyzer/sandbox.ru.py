@@ -59,6 +59,8 @@ def show_kmeans(tests_dict, title='songs'):
     plt.title(title)
     plt.show()
 
+# local vs general on last fm
+
 # ap = list(map(float, artist_plays.values()))
 show_kmeans(artist_plays, 'artist_plays')
 
