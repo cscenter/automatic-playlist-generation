@@ -16,7 +16,7 @@ def broadcast(targets):
         if message == STOP:
             break
 
-songs_to_print = set()
+# songs_to_print = set()
 for dataset_path in ['music']:
     dp = HardDriveProvider(dataset_path)
     # print(len(dp.get_all()))
@@ -26,13 +26,13 @@ for dataset_path in ['music']:
     #     if song_data['id3']:
     #         pass
     #     exit()
-    all_parsers = broadcast([id3_v2_update()])  # , last_fm_update(),
-    # echo_nest_update(), librosa_update()])
+    all_parsers = broadcast([id3_v2_update(), last_fm_update(), echo_nest_update()])
+    # , librosa_update()])
     for i, song in enumerate(dp.get_all(), 1):
         song_data = dp.get_by_id(song)
-        songs_to_print.add((song_data['id3']['artist'],
-                            song_data['id3']['album'],
-                            song_data['id3']['title']))
+        # songs_to_print.add((song_data['id3']['artist'],
+        #                     song_data['id3']['album'],
+        #                     song_data['id3']['title']))
         all_parsers.send(song_data)
         if not (i % 50):
             dp.save_data()

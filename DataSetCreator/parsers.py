@@ -75,34 +75,28 @@ def echo_nest_update():
         if not artist_name:
             artist_name = json_data['id3'].get('artist', '')
 
+        a = None
         try:
             if artist_name:
                 a = artist.Artist(artist_name,
                                   buckets=['biographies', 'blogs',
                                            'doc_counts', 'familiarity',
-                                           'familiarity_rank', 'genre',
-                                           'hotttnesss', 'hotttnesss_rank',
+                                           'hotttnesss', 'genre',
                                            'artist_location', 'news',
-                                           'reviews', 'terms', 'urls',
-                                           'years_active'])
+                                           'reviews', 'urls', 'years_active'])
                 json_data['echo_nest']['artist_id'] = a.id
                 json_data['echo_nest']['artist'] = a.name
                 json_data['echo_nest']['bios'] = a.biographies
                 json_data['echo_nest']['blogs'] = a.blogs
                 json_data['echo_nest']['doc_counts'] = a.doc_counts
-                json_data['echo_nest']['familiarity'] = a.familiarity
-                json_data['echo_nest']['familiarity_rank'] = a.familiarity
-                json_data['echo_nest']['hotttnesss'] = a.hotttnesss
-                json_data['echo_nest']['hotttnesss_rank'] = a.hotttnesss_rank
-                json_data['echo_nest']['location'] = a.artist_location
+                json_data['echo_nest']['a_familiarity'] = a.familiarity
+                json_data['echo_nest']['a_hotttnesss'] = a.hotttnesss
                 json_data['echo_nest']['news'] = a.news
                 json_data['echo_nest']['reviews'] = a.reviews
-                json_data['echo_nest']['terms'] = a.terms
                 json_data['echo_nest']['urls'] = a.urls
                 json_data['echo_nest']['years_active'] = a.years_active
                 time.sleep(1)
                 json_data['echo_nest']['similar'] = a.get_similar()
-                json_data['echo_nest']['genre'] = a.list_genres()
         except EchoNestException as e:
             print(e)
         except socket.timeout:
@@ -110,37 +104,20 @@ def echo_nest_update():
         else:
             time.sleep(1)
 
-        if artist_name or track_title:
-            try:
-                json_data['echo_nest']['basic_artist_list'] =\
-                    playlist.basic(artist=artist_name, song=track_title)
-                json_data['echo_nest']['basic_song_list'] =\
-                    playlist.basic(type='song-radio',
-                                   artist=artist_name, song=track_title)
-            except EchoNestException as e:
-                print(e)
-            except socket.timeout:
-                pass
-            else:
-                time.sleep(1)
-
         if artist_name and track_title:
             results = song.search(artist=artist_name, title=track_title,
                                   buckets=['audio_summary', 'song_hotttnesss',
-                                           'artist_familiarity',
                                            'song_discovery', 'song_currency'])
             if results:
                 try:
                     json_data['echo_nest']['id'] = results[0].id
                     json_data['echo_nest']['summary'] =\
                         results[0].audio_summary
-                    json_data['echo_nest']['hotttnesss'] =\
+                    json_data['echo_nest']['s_hotttnesss'] =\
                         results[0].song_hotttnesss
-                    json_data['echo_nest']['artist_familiarity'] =\
-                        results[0].artist_familiarity
-                    json_data['echo_nest']['discovery'] =\
+                    json_data['echo_nest']['s_discovery'] =\
                         results[0].song_discovery
-                    json_data['echo_nest']['currency'] =\
+                    json_data['echo_nest']['s_currency'] =\
                         results[0].song_currency
                 except EchoNestException as e:
                     print(e)
@@ -149,9 +126,18 @@ def echo_nest_update():
                 else:
                     time.sleep(1)
 
+            tr = None
             if json_data['echo_nest']['id']:
                 try:
                     tr = track.track_from_id(json_data['echo_nest']['id'])
+                except EchoNestException as e:
+                    print(e)
+                except socket.timeout:
+                    pass
+
+                if not tr:
+                    continue
+                try:
                     tr.get_analysis()
                     json_data['echo_nest']['analysis'] = {}
                     json_data['echo_nest']['analysis']['acousticness'] =\
@@ -211,6 +197,20 @@ def echo_nest_update():
                     pass
                 else:
                     time.sleep(1)
+
+                if a and tr:
+                    try:
+                        json_data['echo_nest']['basic_artist_list'] =\
+                            playlist.basic(artist_id=a.id, song_id=tr.id)
+                        json_data['echo_nest']['basic_song_list'] =\
+                            playlist.basic(type='song-radio', artist_id=a.id,
+                                           song_id=tr.id)
+                    except EchoNestException as e:
+                        print(e)
+                    except socket.timeout:
+                        pass
+                    else:
+                        time.sleep(1)
 
 
 @coroutine
@@ -337,17 +337,17 @@ def last_fm_update():
             if not artist_name:
                 continue
             try:
-                artist = network.get_artist(artist_name)
-                if artist:
-                    json_data['lastfm']['artist'] = artist.get_name()
+                artist_data = network.get_artist(artist_name)
+                if artist_data:
+                    json_data['lastfm']['artist'] = artist_data.get_name()
                     json_data['lastfm']['artistsimilar'] =\
-                        [a[0].get_name() for a in artist.get_similar()]
+                        [a[0].get_name() for a in artist_data.get_similar()]
                     json_data['lastfm']['artisttags'] =\
-                        [t[0].get_name() for t in artist.get_top_tags()]
+                        [t[0].get_name() for t in artist_data.get_top_tags()]
                     json_data['lastfm']['artistwiki'] =\
-                        artist.get_wiki_content()
+                        artist_data.get_wiki_content()
                     json_data['lastfm']['artistwikisumm'] =\
-                        artist.get_wiki_summary()
+                        artist_data.get_wiki_summary()
             except pylast.WSError as e:
                 print(e)
             else:
