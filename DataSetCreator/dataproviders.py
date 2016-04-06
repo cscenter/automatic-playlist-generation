@@ -34,9 +34,10 @@ class HardDriveProvider(AbstractDataProvider):
             os.path.basename(os.path.normpath(self.path))))
 
     @staticmethod
-    def filter_mp3(filepath):
-        _, file_extension = os.path.splitext(filepath)
-        return 'mp3' in file_extension
+    def filter_mp3(file_path):
+        file_name, file_extension = os.path.splitext(file_path)
+        return not file_name.startswith('._')\
+            and 'mp3' in file_extension
 
     def get_all(self):
         return dict((k, v) for k, v in self.data.items()

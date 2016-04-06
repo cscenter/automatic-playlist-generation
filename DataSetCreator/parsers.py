@@ -6,7 +6,7 @@ import time
 from functools import wraps
 from mutagen.id3 import ID3, MutagenError
 from passwords import *
-from pyechonest.util import EchoNestException
+from pyechonest.util import EchoNestException, EchoNestIOError
 from pyechonest import artist, playlist, song, track
 
 STOP = object()
@@ -67,7 +67,7 @@ def echo_nest_update():
         json_data['echo_nest'] = {}
         track_title = ''
         artist_name = ''
-        if json_data['lastfm']:
+        if json_data.get('lastfm', ''):
             track_title = json_data['lastfm'].get('track', '')
             artist_name = json_data['lastfm'].get('artist', '')
         if not track_title:
@@ -96,20 +96,31 @@ def echo_nest_update():
                 json_data['echo_nest']['urls'] = a.urls
                 json_data['echo_nest']['years_active'] = a.years_active
                 time.sleep(1)
-                json_data['echo_nest']['similar'] = a.get_similar()
+                json_data['echo_nest']['similar'] = [str(sim.name) for sim
+                                                     in a.get_similar()]
         except EchoNestException as e:
+            print(e)
+        except EchoNestIOError as e:
             print(e)
         except socket.timeout:
             pass
         else:
             time.sleep(1)
 
-        if artist_name and track_title:
-            results = song.search(artist=artist_name, title=track_title,
-                                  buckets=['audio_summary', 'song_hotttnesss',
-                                           'song_discovery', 'song_currency'])
-            if results:
+            if a and track_title:
                 try:
+                    results = song.search(artist=a.name,
+                                          title=track_title)
+                except EchoNestException as e:
+                    print(e)
+                except EchoNestIOError as e:
+                    print(e)
+                except socket.timeout:
+                    pass
+                else:
+                    time.sleep(1)
+
+                if results:
                     json_data['echo_nest']['id'] = results[0].id
                     json_data['echo_nest']['summary'] =\
                         results[0].audio_summary
@@ -117,20 +128,14 @@ def echo_nest_update():
                         results[0].song_hotttnesss
                     json_data['echo_nest']['s_discovery'] =\
                         results[0].song_discovery
-                    json_data['echo_nest']['s_currency'] =\
-                        results[0].song_currency
-                except EchoNestException as e:
-                    print(e)
-                except socket.timeout:
-                    pass
-                else:
-                    time.sleep(1)
 
             tr = None
-            if json_data['echo_nest']['id']:
+            if json_data['echo_nest'].get('id', ''):
                 try:
                     tr = track.track_from_id(json_data['echo_nest']['id'])
                 except EchoNestException as e:
+                    print(e)
+                except EchoNestIOError as e:
                     print(e)
                 except socket.timeout:
                     pass
@@ -191,27 +196,43 @@ def echo_nest_update():
                         tr.time_signature_confidence
                 except EchoNestException as e:
                     print(e)
+                except EchoNestIOError as e:
+                    print(e)
                 except socket.timeout:
                     pass
-                except:
-                    pass
+                except Exception as e:
+                    print(e)
                 else:
                     time.sleep(1)
 
                 if a and tr:
                     try:
-                        json_data['echo_nest']['basic_artist_list'] =\
-                            playlist.basic(artist_id=a.id, song_id=tr.id)
                         json_data['echo_nest']['basic_song_list'] =\
-                            playlist.basic(type='song-radio', artist_id=a.id,
-                                           song_id=tr.id)
+                            ['{} - {}'.format(s.title, s.artist_name) for s in
+                             playlist.basic(type='song-radio',
+                                            artist_id=a.id,
+                                            song_id=tr.id)]
                     except EchoNestException as e:
+                        print(e)
+                    except EchoNestIOError as e:
                         print(e)
                     except socket.timeout:
                         pass
                     else:
                         time.sleep(1)
 
+                    try:
+                        json_data['echo_nest']['basic_artist_list'] =\
+                            ['{} - {}'.format(s.title, s.artist_name) for s in
+                             playlist.basic(artist_id=a.id, song_id=tr.id)]
+                    except EchoNestException as e:
+                        print(e)
+                    except EchoNestIOError as e:
+                        print(e)
+                    except socket.timeout:
+                        pass
+                    else:
+                        time.sleep(1)
 
 @coroutine
 def essentia_update():
@@ -386,7 +407,9 @@ def last_fm_update():
                         json_data['lastfm']['tracktags'] =\
                             [t[0].get_name() for t in trackinfo.get_top_tags()]
                         json_data['lastfm']['tracksimilar'] =\
-                            [a[0].get_name() for a in sim_tracks]
+                            ['{} - {}'.format(a[0].get_artist(),
+                                              a[0].get_name())
+                             for a in sim_tracks]
                         json_data['lastfm']['trackwiki'] =\
                             trackinfo.get_wiki_content()
                         json_data['lastfm']['trackwikisumm'] =\
