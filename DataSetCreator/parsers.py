@@ -86,16 +86,20 @@ def echo_nest_update():
                                            'reviews', 'urls', 'years_active'])
                 json_data['echo_nest']['artist_id'] = a.id
                 json_data['echo_nest']['artist'] = a.name
+                time.sleep(1)
                 json_data['echo_nest']['bios'] = a.biographies
                 json_data['echo_nest']['blogs'] = a.blogs
+                time.sleep(1)
                 json_data['echo_nest']['doc_counts'] = a.doc_counts
                 json_data['echo_nest']['a_familiarity'] = a.familiarity
+                time.sleep(1)
                 json_data['echo_nest']['a_hotttnesss'] = a.hotttnesss
                 json_data['echo_nest']['news'] = a.news
+                time.sleep(1)
                 json_data['echo_nest']['reviews'] = a.reviews
                 json_data['echo_nest']['urls'] = a.urls
-                json_data['echo_nest']['years_active'] = a.years_active
                 time.sleep(1)
+                json_data['echo_nest']['years_active'] = a.years_active
                 json_data['echo_nest']['similar'] = [str(sim.name) for sim
                                                      in a.get_similar()]
         except EchoNestException as e:
@@ -104,135 +108,135 @@ def echo_nest_update():
             print(e)
         except socket.timeout:
             pass
-        else:
+
+        time.sleep(1)
+        if a and track_title:
+            try:
+                results = song.search(artist=a.name,
+                                      title=track_title)
+            except EchoNestException as e:
+                print(e)
+            except EchoNestIOError as e:
+                print(e)
+            except socket.timeout:
+                pass
             time.sleep(1)
 
-            if a and track_title:
-                try:
-                    results = song.search(artist=a.name,
-                                          title=track_title)
-                except EchoNestException as e:
-                    print(e)
-                except EchoNestIOError as e:
-                    print(e)
-                except socket.timeout:
-                    pass
-                else:
-                    time.sleep(1)
+            if results:
+                json_data['echo_nest']['id'] = results[0].id
+                json_data['echo_nest']['summary'] =\
+                    results[0].audio_summary
+                time.sleep(1)
+                json_data['echo_nest']['s_hotttnesss'] =\
+                    results[0].song_hotttnesss
+                time.sleep(1)
+                json_data['echo_nest']['s_discovery'] =\
+                    results[0].song_discovery
+                time.sleep(1)
 
-                if results:
-                    json_data['echo_nest']['id'] = results[0].id
-                    json_data['echo_nest']['summary'] =\
-                        results[0].audio_summary
-                    json_data['echo_nest']['s_hotttnesss'] =\
-                        results[0].song_hotttnesss
-                    json_data['echo_nest']['s_discovery'] =\
-                        results[0].song_discovery
+        tr = None
+        if json_data['echo_nest'].get('id', ''):
+            try:
+                tr = track.track_from_id(json_data['echo_nest']['id'])
+            except EchoNestException as e:
+                print(e)
+            except EchoNestIOError as e:
+                print(e)
+            except socket.timeout:
+                pass
+            time.sleep(1)
 
-            tr = None
-            if json_data['echo_nest'].get('id', ''):
-                try:
-                    tr = track.track_from_id(json_data['echo_nest']['id'])
-                except EchoNestException as e:
-                    print(e)
-                except EchoNestIOError as e:
-                    print(e)
-                except socket.timeout:
-                    pass
+        if not tr:
+            continue
+        try:
+            tr.get_analysis()
+            json_data['echo_nest']['analysis'] = {}
+            json_data['echo_nest']['analysis']['acousticness'] =\
+                tr.acousticness
+            json_data['echo_nest']['analysis']['analysis_url'] =\
+                tr.analysis_url
+            json_data['echo_nest']['analysis']['danceability'] =\
+                tr.danceability
+            json_data['echo_nest']['analysis']['duration'] =\
+                tr.duration
+            json_data['echo_nest']['analysis']['energy'] = tr.energy
+            json_data['echo_nest']['analysis']['key'] = tr.key
+            json_data['echo_nest']['analysis']['liveness'] =\
+                tr.liveness
+            json_data['echo_nest']['analysis']['loudness'] =\
+                tr.loudness
+            json_data['echo_nest']['analysis']['mode'] = tr.mode
+            json_data['echo_nest']['analysis']['speechiness'] =\
+                tr.speechiness
+            json_data['echo_nest']['analysis']['tempo'] =\
+                tr.tempo
+            json_data['echo_nest']['analysis']['time_signature'] =\
+                tr.time_signature
+            json_data['echo_nest']['analysis']['valence'] = tr.valence
+            json_data['echo_nest']['analysis']['analysis_channels'] =\
+                tr.analysis_channels
+            json_data['echo_nest']['analysis']['bars'] = tr.bars
+            json_data['echo_nest']['analysis']['beats'] = tr.beats
+            json_data['echo_nest']['analysis']['start_of_fade_out'] =\
+                tr.start_of_fade_out
+            json_data['echo_nest']['analysis']['end_of_fade_in'] =\
+                tr.end_of_fade_in
+            json_data['echo_nest']['analysis']['key_confidence'] =\
+                tr.key_confidence
+            json_data['echo_nest']['analysis']['meta'] = tr.meta
+            json_data['echo_nest']['analysis']['mode_confidence'] =\
+                tr.mode_confidence
+            json_data['echo_nest']['analysis']['num_samples'] =\
+                tr.num_samples
+            json_data['echo_nest']['analysis']['sections'] =\
+                tr.sections
+            json_data['echo_nest']['analysis']['segments'] =\
+                tr.segments
+            json_data['echo_nest']['analysis']['synchstring'] =\
+                tr.synchstring
+            json_data['echo_nest']['analysis']['tatums'] =\
+                tr.tatums
+            json_data['echo_nest']['analysis']['tempo_confidence'] =\
+                tr.tempo_confidence
+            json_data['echo_nest']['analysis']['sign_confidence'] =\
+                tr.time_signature_confidence
+        except EchoNestException as e:
+            print(e)
+        except EchoNestIOError as e:
+            print(e)
+        except socket.timeout:
+            pass
+        except Exception as e:
+            print(e)
+        time.sleep(1)
 
-                if not tr:
-                    continue
-                try:
-                    tr.get_analysis()
-                    json_data['echo_nest']['analysis'] = {}
-                    json_data['echo_nest']['analysis']['acousticness'] =\
-                        tr.acousticness
-                    json_data['echo_nest']['analysis']['analysis_url'] =\
-                        tr.analysis_url
-                    json_data['echo_nest']['analysis']['danceability'] =\
-                        tr.danceability
-                    json_data['echo_nest']['analysis']['duration'] =\
-                        tr.duration
-                    json_data['echo_nest']['analysis']['energy'] = tr.energy
-                    json_data['echo_nest']['analysis']['key'] = tr.key
-                    json_data['echo_nest']['analysis']['liveness'] =\
-                        tr.liveness
-                    json_data['echo_nest']['analysis']['loudness'] =\
-                        tr.loudness
-                    json_data['echo_nest']['analysis']['mode'] = tr.mode
-                    json_data['echo_nest']['analysis']['speechiness'] =\
-                        tr.speechiness
-                    json_data['echo_nest']['analysis']['tempo'] =\
-                        tr.tempo
-                    json_data['echo_nest']['analysis']['time_signature'] =\
-                        tr.time_signature
-                    json_data['echo_nest']['analysis']['valence'] = tr.valence
-                    json_data['echo_nest']['analysis']['analysis_channels'] =\
-                        tr.analysis_channels
-                    json_data['echo_nest']['analysis']['bars'] = tr.bars
-                    json_data['echo_nest']['analysis']['beats'] = tr.beats
-                    json_data['echo_nest']['analysis']['start_of_fade_out'] =\
-                        tr.start_of_fade_out
-                    json_data['echo_nest']['analysis']['end_of_fade_in'] =\
-                        tr.end_of_fade_in
-                    json_data['echo_nest']['analysis']['key_confidence'] =\
-                        tr.key_confidence
-                    json_data['echo_nest']['analysis']['meta'] = tr.meta
-                    json_data['echo_nest']['analysis']['mode_confidence'] =\
-                        tr.mode_confidence
-                    json_data['echo_nest']['analysis']['num_samples'] =\
-                        tr.num_samples
-                    json_data['echo_nest']['analysis']['sections'] =\
-                        tr.sections
-                    json_data['echo_nest']['analysis']['segments'] =\
-                        tr.segments
-                    json_data['echo_nest']['analysis']['synchstring'] =\
-                        tr.synchstring
-                    json_data['echo_nest']['analysis']['tatums'] =\
-                        tr.tatums
-                    json_data['echo_nest']['analysis']['tempo_confidence'] =\
-                        tr.tempo_confidence
-                    json_data['echo_nest']['analysis']['sign_confidence'] =\
-                        tr.time_signature_confidence
-                except EchoNestException as e:
-                    print(e)
-                except EchoNestIOError as e:
-                    print(e)
-                except socket.timeout:
-                    pass
-                except Exception as e:
-                    print(e)
-                else:
-                    time.sleep(1)
+        if a:
+            try:
+                json_data['echo_nest']['basic_song_list'] =\
+                    ['{} - {}'.format(s.artist_name, s.title) for s in
+                     playlist.basic(type='song-radio',
+                                    artist_id=a.id,
+                                    song_id=tr.id)]
+            except EchoNestException as e:
+                print(e)
+            except EchoNestIOError as e:
+                print(e)
+            except socket.timeout:
+                pass
+            time.sleep(1)
 
-                if a and tr:
-                    try:
-                        json_data['echo_nest']['basic_song_list'] =\
-                            ['{} - {}'.format(s.title, s.artist_name) for s in
-                             playlist.basic(type='song-radio',
-                                            artist_id=a.id,
-                                            song_id=tr.id)]
-                    except EchoNestException as e:
-                        print(e)
-                    except EchoNestIOError as e:
-                        print(e)
-                    except socket.timeout:
-                        pass
-                    else:
-                        time.sleep(1)
+            try:
+                json_data['echo_nest']['basic_artist_list'] =\
+                    ['{} - {}'.format(s.artist_name, s.title) for s in
+                     playlist.basic(artist_id=a.id, song_id=tr.id)]
+            except EchoNestException as e:
+                print(e)
+            except EchoNestIOError as e:
+                print(e)
+            except socket.timeout:
+                pass
+            time.sleep(1)
 
-                    try:
-                        json_data['echo_nest']['basic_artist_list'] =\
-                            ['{} - {}'.format(s.title, s.artist_name) for s in
-                             playlist.basic(artist_id=a.id, song_id=tr.id)]
-                    except EchoNestException as e:
-                        print(e)
-                    except EchoNestIOError as e:
-                        print(e)
-                    except socket.timeout:
-                        pass
-                    else:
-                        time.sleep(1)
 
 @coroutine
 def essentia_update():
