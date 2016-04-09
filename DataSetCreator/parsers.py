@@ -85,23 +85,30 @@ def echo_nest_update():
                                            'artist_location', 'news',
                                            'reviews', 'urls', 'years_active'])
                 json_data['echo_nest']['artist_id'] = a.id
+                time.sleep(1)
                 json_data['echo_nest']['artist'] = a.name
                 time.sleep(1)
                 json_data['echo_nest']['bios'] = a.biographies
+                time.sleep(1)
                 json_data['echo_nest']['blogs'] = a.blogs
                 time.sleep(1)
                 json_data['echo_nest']['doc_counts'] = a.doc_counts
+                time.sleep(1)
                 json_data['echo_nest']['a_familiarity'] = a.familiarity
                 time.sleep(1)
                 json_data['echo_nest']['a_hotttnesss'] = a.hotttnesss
+                time.sleep(1)
                 json_data['echo_nest']['news'] = a.news
                 time.sleep(1)
                 json_data['echo_nest']['reviews'] = a.reviews
+                time.sleep(1)
                 json_data['echo_nest']['urls'] = a.urls
                 time.sleep(1)
                 json_data['echo_nest']['years_active'] = a.years_active
+                time.sleep(1)
                 json_data['echo_nest']['similar'] = [str(sim.name) for sim
                                                      in a.get_similar()]
+                time.sleep(1)
         except EchoNestException as e:
             print(e)
         except EchoNestIOError as e:
@@ -113,7 +120,11 @@ def echo_nest_update():
         if a and track_title:
             try:
                 results = song.search(artist=a.name,
-                                      title=track_title)
+                                      title=track_title,
+                                      buckets=['audio_summary',
+                                               'song_hotttnesss',
+                                               'song_discovery'])
+                time.sleep(1)
             except EchoNestException as e:
                 print(e)
             except EchoNestIOError as e:
@@ -124,6 +135,7 @@ def echo_nest_update():
 
             if results:
                 json_data['echo_nest']['id'] = results[0].id
+                time.sleep(1)
                 json_data['echo_nest']['summary'] =\
                     results[0].audio_summary
                 time.sleep(1)
@@ -133,11 +145,13 @@ def echo_nest_update():
                 json_data['echo_nest']['s_discovery'] =\
                     results[0].song_discovery
                 time.sleep(1)
+        time.sleep(1)
 
         tr = None
         if json_data['echo_nest'].get('id', ''):
             try:
                 tr = track.track_from_id(json_data['echo_nest']['id'])
+                time.sleep(1)
             except EchoNestException as e:
                 print(e)
             except EchoNestIOError as e:
@@ -150,6 +164,7 @@ def echo_nest_update():
             continue
         try:
             tr.get_analysis()
+            time.sleep(1)
             json_data['echo_nest']['analysis'] = {}
             json_data['echo_nest']['analysis']['acousticness'] =\
                 tr.acousticness
@@ -217,6 +232,7 @@ def echo_nest_update():
                      playlist.basic(type='song-radio',
                                     artist_id=a.id,
                                     song_id=tr.id)]
+                time.sleep(1)
             except EchoNestException as e:
                 print(e)
             except EchoNestIOError as e:
@@ -229,6 +245,7 @@ def echo_nest_update():
                 json_data['echo_nest']['basic_artist_list'] =\
                     ['{} - {}'.format(s.artist_name, s.title) for s in
                      playlist.basic(artist_id=a.id, song_id=tr.id)]
+                time.sleep(1)
             except EchoNestException as e:
                 print(e)
             except EchoNestIOError as e:

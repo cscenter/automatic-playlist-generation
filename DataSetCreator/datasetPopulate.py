@@ -27,8 +27,8 @@ for dataset_path in ['music']:
     #     if song_data['id3']:
     #         pass
     #     exit()
-    all_parsers = broadcast([id3_v2_update(), echo_nest_update()])
-                             # last_fm_update()])
+    all_parsers = broadcast([id3_v2_update(), last_fm_update(),
+                             echo_nest_update()])
     # , ])
     # , librosa_update()])
     for i, song in enumerate(dp.get_all(), 1):
