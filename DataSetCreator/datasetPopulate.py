@@ -17,7 +17,7 @@ def broadcast(targets):
             break
 
 # songs_to_print = set()
-for dataset_path in ['music']:
+for dataset_path in ['VkDataset #5']:
     dp = HardDriveProvider(dataset_path)
     # print(len(dp.get_all()))
     # print(sum(1 if song['id3'] else 0
