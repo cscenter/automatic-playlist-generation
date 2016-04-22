@@ -1,11 +1,11 @@
 import sys
 from mutagen.id3 import ID3
 from collections import Counter
-from get_lyrics import get_lyrics_wikia
+from get_lyrics import get_lyrics_wikia, get_lyrics_metro
 import difflib
 
 
-path = "02_Creep.mp3"
+paths = ["01 Black Dog.mp3", "02 A Beautiful Lie.mp3", "02 Edge of the Earth.mp3", "03 The Kill.mp3", "05 The Fantasy.mp3", "10 93 Million Miles.mp3", "1-02 Paint It Black.mp3", "07 bad to the bone.mp3", "11 Wake Me Up When September Ends.mp3" ]
 
 
 def get_lyrics_id3(path):
@@ -22,15 +22,12 @@ def get_lyrics_id3(path):
 
 def test_diff(lyrics_1, lyrics_2):
 
-    result = ''.join(difflib.unified_diff(lyrics_1, lyrics_2))  
+    result = ''.join(difflib.unified_diff(lyrics_1, lyrics_2))
 
     if (len(result) < len(lyrics_1)/2):        # number is questionable
-        print("OK")
+        return True
     else:
-        print("Not OK")
-
-
-    return   
+        return False
 
 def lyrics_to_list(txt):
     
@@ -52,24 +49,38 @@ def test_count(lyrics_1, lyrics_2):
     counter_2 = Counter(lyr_2)
 
     shared = set(counter_1.items()) & set(counter_2.items())
-    if (len(counter_1) - len(shared)) < 5:     # number is questionable
-        print("OK")
+    max_len = max(len(counter_1), len(counter_2))
+    
+    if (len(shared)> max_len/3):
+        return True
     else:
-        print("Not OK")        
+        return False      
 
         
+for path in paths:
 
+    audio = ID3(path)
+    artist_name = audio['TPE1'].text[0]
+    title_name = audio['TIT2'].text[0]
 
-audio = ID3(path)
-artist_name = audio['TPE1'].text[0]
-title_name = audio['TIT2'].text[0]
+    print(artist_name)
+    print(title_name)
+    
+    lyrics_w = get_lyrics_wikia(title_name, artist_name, 1)
 
-lyrics_w = get_lyrics_wikia(title_name, artist_name)
-lyrics_id3 = get_lyrics_id3(path)
+    if (lyrics_w == ""):
+        lyrics_w = get_lyrics_metro(title_name, artist_name, 1)   
+    
+    lyrics_id3 = get_lyrics_id3(path)
 
-test_diff(lyrics_w, lyrics_id3)
+    if (lyrics_id3 != ""):
 
-test_count(lyrics_w, lyrics_id3)
-
-
+        if test_count(lyrics_w, lyrics_id3):
+            print("OK")
+        elif test_count(lyrics_w, lyrics_id3):
+            print("OK")
+        else:
+            print("Not OK")
+    else:
+        print("No lyrics at ID3")
 
