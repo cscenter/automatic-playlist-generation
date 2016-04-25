@@ -21,15 +21,14 @@ for key in data:
 
             if id["lyrics"] != "":
 
-                lyr = get_lyrics(title_name, artist_name)
-                time.sleep(1)
+                lyr = get_lyrics_wikia(title_name, artist_name, 1)
 
                 if (lyr[0:4] != no_lyr) and (lyr[0:4] != no_lyr.lower()) :
                     id["lyrics"] = lyr
 
                     
                        
-                with open(path) as data_w:
+                with open(path, "w") as data_w:
                     data_w.write(json.dumps(data))
 
 
