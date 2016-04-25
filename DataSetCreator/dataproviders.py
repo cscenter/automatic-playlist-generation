@@ -1,6 +1,6 @@
 import json
 import os
-
+from mutagen import ID3, MutagenError
 from pymongo import MongoClient
 
 
@@ -35,9 +35,17 @@ class HardDriveProvider(AbstractDataProvider):
 
     @staticmethod
     def filter_mp3(file_path):
-        file_name, file_extension = os.path.splitext(file_path)
-        return not file_name.startswith('._')\
-            and 'mp3' in file_extension
+        file_name, _ = os.path.splitext(file_path)
+        if file_name.startswith('._'):
+            return False
+        try:
+            _ = ID3(file_path)
+        except MutagenError:
+            return False
+        except FileNotFoundError:
+            pass
+        else:
+            return True
 
     def get_all(self):
         return dict((k, v) for k, v in self.data.items()
