@@ -1,6 +1,6 @@
 import json
 import os
-from mutagen import ID3, MutagenError
+from mutagen.id3 import ID3, MutagenError
 from pymongo import MongoClient
 
 
