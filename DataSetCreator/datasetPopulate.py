@@ -17,8 +17,8 @@ def broadcast(targets):
             break
 
 # songs_to_print = set()
-for dataset_path in ['VkDataset #5']:
-    dp = HardDriveProvider(dataset_path)
+for dataset_path in ['music']:
+    dp = HardDriveProvider(dataset_path, True)
     # print(len(dp.get_all()))
     # print(sum(1 if song['id3'] else 0
     # for song in map(dp.get_by_id, dp.get_all())))
@@ -27,8 +27,10 @@ for dataset_path in ['VkDataset #5']:
     #     if song_data['id3']:
     #         pass
     #     exit()
-    all_parsers = broadcast([id3_v2_update(), last_fm_update(),
-                             echo_nest_update()])
+    all_parsers = broadcast([id3_v2_update(),
+                             # last_fm_update(),
+                             # echo_nest_update()
+                             ])
     # , ])
     # , librosa_update()])
     for i, song in enumerate(dp.get_all(), 1):

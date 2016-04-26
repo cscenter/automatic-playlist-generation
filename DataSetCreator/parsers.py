@@ -492,37 +492,36 @@ def id3_v2_update():
     """
     Updates the json with all ID3v2 tags available for this song
     mutagen package required """
+    def get_tag_or_default(tags_dict, tag):
+        return ','.join(map(str, tags_dict.getall(tag)))
+
     while True:
         json_data = yield
         if json_data == STOP:
             break
-
+        json_data['path'] = json_data['path'].replace('._', '')
         if json_data.get('id3', ''):
+            json_data['id3']['lyrics'] = get_tag_or_default(
+                ID3(json_data['path']), 'USLT')
             continue
         json_data['id3'] = {}
         try:
-            json_data['path'] = json_data['path'].replace('._', '')
             print(json_data['path'])
             tags = ID3(json_data['path'])
-
-            def get_tag_or_default(tag):
-                return ','.join(map(str, tags[tag].text)) \
-                    if tag in tags else ""
-
-            json_data['id3']['genre2'] = get_tag_or_default('TIT1')
-            json_data['id3']['title'] = get_tag_or_default('TIT2')
-            json_data['id3']['artist'] = get_tag_or_default('TPE1')
-            json_data['id3']['album'] = get_tag_or_default('TALB')
-            json_data['id3']['composer'] = get_tag_or_default('TCOM')
-            json_data['id3']['text_writer'] = get_tag_or_default('TEXT')
-            json_data['id3']['artist2'] = get_tag_or_default('TPE2')
-            json_data['id3']['artist3'] = get_tag_or_default('TPE3')
-            json_data['id3']['artist4'] = get_tag_or_default('TPE4')
-            json_data['id3']['year'] = get_tag_or_default('TDRC')
-            json_data['id3']['genre'] = get_tag_or_default('TCON')
-            json_data['id3']['track number'] = get_tag_or_default('TRCK')
-            json_data['id3']['length'] = get_tag_or_default('TLEN')
-            json_data['id3']['lyrics'] = get_tag_or_default('USLT')
+            json_data['id3']['genre2'] = get_tag_or_default(tags, 'TIT1')
+            json_data['id3']['title'] = get_tag_or_default(tags, 'TIT2')
+            json_data['id3']['artist'] = get_tag_or_default(tags, 'TPE1')
+            json_data['id3']['album'] = get_tag_or_default(tags, 'TALB')
+            json_data['id3']['composer'] = get_tag_or_default(tags, 'TCOM')
+            json_data['id3']['text_writer'] = get_tag_or_default(tags, 'TEXT')
+            json_data['id3']['artist2'] = get_tag_or_default(tags, 'TPE2')
+            json_data['id3']['artist3'] = get_tag_or_default(tags, 'TPE3')
+            json_data['id3']['artist4'] = get_tag_or_default(tags, 'TPE4')
+            json_data['id3']['year'] = get_tag_or_default(tags, 'TDRC')
+            json_data['id3']['genre'] = get_tag_or_default(tags, 'TCON')
+            json_data['id3']['track number'] = get_tag_or_default(tags, 'TRCK')
+            json_data['id3']['length'] = get_tag_or_default(tags, 'TLEN')
+            json_data['id3']['lyrics'] = get_tag_or_default(tags, 'USLT')
 
         except MutagenError as e:
             print(e)

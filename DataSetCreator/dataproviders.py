@@ -16,18 +16,23 @@ class AbstractDataProvider:
 
 
 class HardDriveProvider(AbstractDataProvider):
-    def __init__(self, p):
+    def __init__(self, p, force_upd=False):
         self.path = p
+        self.force_update = force_upd
+
+        self.data = {}
         if os.path.exists(self._get_data_file_path()):
             with open(self._get_data_file_path()) as r:
                 self.data = json.load(r)
-        else:
-            self.data = {}
-            for root, _, files in os.walk(self.path):
-                for filepath in filter(self.filter_mp3, files):
-                    file_path = os.path.join(root, filepath)
-                    file_json = {'path': file_path}
-                    self.data[file_path] = file_json
+        if self.data and not self.force_update:
+            return
+        for root, _, files in os.walk(self.path):
+            for filepath in files:
+                file_path = os.path.join(root, filepath)
+                if not self.filter_mp3(file_path) or file_path in self.data:
+                    continue
+                file_json = {'path': file_path}
+                self.data[file_path] = file_json
 
     def _get_data_file_path(self):
         return os.path.join(self.path, '{}.json'.format(
@@ -36,11 +41,11 @@ class HardDriveProvider(AbstractDataProvider):
     @staticmethod
     def filter_mp3(file_path):
         file_name, _ = os.path.splitext(file_path)
-        if file_name.startswith('._'):
+        if file_name.find('\\._') >= 0:
             return False
         try:
             _ = ID3(file_path)
-        except MutagenError:
+        except MutagenError as e:
             return False
         except FileNotFoundError:
             pass
