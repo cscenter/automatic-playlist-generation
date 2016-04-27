@@ -493,7 +493,9 @@ def id3_v2_update():
     Updates the json with all ID3v2 tags available for this song
     mutagen package required """
     def get_tag_or_default(tags_dict, tag):
-        return ','.join(map(str, tags_dict.getall(tag)))
+        return ','.join(map(str, tags_dict.getall(tag)))\
+                  .replace("\r\n", "\n")\
+                  .replace("\r", "\n")
 
     while True:
         json_data = yield

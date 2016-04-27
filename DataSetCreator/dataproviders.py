@@ -1,6 +1,7 @@
 import json
 import os
-from mutagen.id3 import ID3, MutagenError
+from mutagen import File
+from mutagen.id3 import MutagenError
 from pymongo import MongoClient
 
 
@@ -44,7 +45,7 @@ class HardDriveProvider(AbstractDataProvider):
         if file_name.find('\\._') >= 0:
             return False
         try:
-            _ = ID3(file_path)
+            _ = File(file_path)
         except MutagenError as e:
             return False
         except FileNotFoundError:
