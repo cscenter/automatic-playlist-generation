@@ -4,6 +4,7 @@ import socket
 import time
 # from essentia.standard import *
 from functools import wraps
+from mutagen.mp4 import MP4
 from mutagen.id3 import ID3, MutagenError
 from passwords import *
 from pyechonest.util import EchoNestException, EchoNestIOError
@@ -492,8 +493,13 @@ def id3_v2_update():
     """
     Updates the json with all ID3v2 tags available for this song
     mutagen package required """
-    def get_tag_or_default(tags_dict, tag):
+    def get_id3_or_default(tags_dict, tag):
         return ','.join(map(str, tags_dict.getall(tag)))\
+                  .replace("\r\n", "\n")\
+                  .replace("\r", "\n")
+
+    def get_m4a_tags(tags_dict, tag):
+        return ','.join(map(str, tags_dict.get(tag, '')))\
                   .replace("\r\n", "\n")\
                   .replace("\r", "\n")
 
@@ -503,29 +509,61 @@ def id3_v2_update():
             break
         json_data['path'] = json_data['path'].replace('._', '')
         if json_data.get('id3', ''):
-            json_data['id3']['lyrics'] = get_tag_or_default(
-                ID3(json_data['path']), 'USLT')
+            try:
+                json_data['id3']['lyrics'] = get_id3_or_default(
+                    ID3(json_data['path']), 'USLT')
+                continue
+            except MutagenError:
+                json_data['id3']['lyrics'] = get_m4a_tags(
+                    MP4(json_data['path']), 'USLT')
             continue
         json_data['id3'] = {}
         try:
             print(json_data['path'])
             tags = ID3(json_data['path'])
-            json_data['id3']['genre2'] = get_tag_or_default(tags, 'TIT1')
-            json_data['id3']['title'] = get_tag_or_default(tags, 'TIT2')
-            json_data['id3']['artist'] = get_tag_or_default(tags, 'TPE1')
-            json_data['id3']['album'] = get_tag_or_default(tags, 'TALB')
-            json_data['id3']['composer'] = get_tag_or_default(tags, 'TCOM')
-            json_data['id3']['text_writer'] = get_tag_or_default(tags, 'TEXT')
-            json_data['id3']['artist2'] = get_tag_or_default(tags, 'TPE2')
-            json_data['id3']['artist3'] = get_tag_or_default(tags, 'TPE3')
-            json_data['id3']['artist4'] = get_tag_or_default(tags, 'TPE4')
-            json_data['id3']['year'] = get_tag_or_default(tags, 'TDRC')
-            json_data['id3']['genre'] = get_tag_or_default(tags, 'TCON')
-            json_data['id3']['track number'] = get_tag_or_default(tags, 'TRCK')
-            json_data['id3']['length'] = get_tag_or_default(tags, 'TLEN')
-            json_data['id3']['lyrics'] = get_tag_or_default(tags, 'USLT')
-
-        except MutagenError as e:
-            print(e)
+            json_data['id3']['genre2'] = get_id3_or_default(tags, 'TIT1')
+            json_data['id3']['title'] = get_id3_or_default(tags, 'TIT2')
+            json_data['id3']['artist'] = get_id3_or_default(tags, 'TPE1')
+            json_data['id3']['album'] = get_id3_or_default(tags, 'TALB')
+            json_data['id3']['composer'] = get_id3_or_default(tags, 'TCOM')
+            json_data['id3']['text_writer'] = get_id3_or_default(tags, 'TEXT')
+            json_data['id3']['artist2'] = get_id3_or_default(tags, 'TPE2')
+            json_data['id3']['artist3'] = get_id3_or_default(tags, 'TPE3')
+            json_data['id3']['artist4'] = get_id3_or_default(tags, 'TPE4')
+            json_data['id3']['year'] = get_id3_or_default(tags, 'TDRC')
+            json_data['id3']['genre'] = get_id3_or_default(tags, 'TCON')
+            json_data['id3']['track number'] = get_id3_or_default(tags, 'TRCK')
+            json_data['id3']['length'] = get_id3_or_default(tags, 'TLEN')
+            json_data['id3']['lyrics'] = get_id3_or_default(tags, 'USLT')
+        except MutagenError:
+            try:
+                tags = MP4(json_data['path'])
+                json_data['id3']['genre2'] = ''
+                json_data['id3']['title'] =\
+                    get_m4a_tags(tags, '\xa9nam')
+                json_data['id3']['artist'] =\
+                    get_m4a_tags(tags, '\xa9ART')
+                json_data['id3']['album'] =\
+                    get_m4a_tags(tags, '\xa9alb')
+                json_data['id3']['composer'] =\
+                    get_m4a_tags(tags, '\xa9wrt')
+                json_data['id3']['text_writer'] = ''
+                json_data['id3']['artist2'] =\
+                    get_m4a_tags(tags, 'aART')
+                json_data['id3']['artist3'] = ''
+                json_data['id3']['artist4'] = ''
+                json_data['id3']['year'] =\
+                    get_m4a_tags(tags, '\xa9day')
+                json_data['id3']['genre'] =\
+                    get_m4a_tags(tags, '\xa9gen')
+                json_data['id3']['track number'] =\
+                    get_m4a_tags(tags, 'trkn')
+                json_data['id3']['length'] = ''
+                json_data['id3']['lyrics'] =\
+                    get_m4a_tags(tags, '\xa9lyr')
+            except MutagenError as e:
+                print(e)
+            except FileNotFoundError:
+                pass
         except FileNotFoundError:
             pass
