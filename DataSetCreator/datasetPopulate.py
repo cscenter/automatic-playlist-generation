@@ -28,8 +28,8 @@ for dataset_path in ['music']:
     #         pass
     #     exit()
     all_parsers = broadcast([id3_v2_update(),
-                             # last_fm_update(),
-                             # echo_nest_update()
+                             last_fm_update(),
+                             echo_nest_update()
                              ])
     # , ])
     # , librosa_update()])
