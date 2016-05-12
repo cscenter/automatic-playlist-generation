@@ -1,10 +1,11 @@
-from datasetcreator.dataproviders import HardDriveProvider
+from collections import defaultdict
+from DataSetCreator.dataproviders import HardDriveProvider
 
 
 def flatten_dataset(json_data):
-    result = {}
+    result = defaultdict(lambda: None)
     if 'id3' in json_data:
-        id3_data = data['id3']
+        id3_data = json_data['id3']
         result['id3_title'] = id3_data.get('title', None)
         result['id3_album'] = id3_data.get('album', None)
         result['id3_artist'] = id3_data.get('artist', None)
@@ -64,6 +65,5 @@ def flatten_dataset(json_data):
     return result
 
 dp = HardDriveProvider('music')
-data = dp.get_all()
-for song_path in dp.get_all():
-    song = dp.get_by_id(song_path)
+for song_path in dp.data:
+    song = flatten_dataset(dp.get_by_id(song_path))
