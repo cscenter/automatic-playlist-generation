@@ -35,27 +35,7 @@ def coroutine(gen):
 @coroutine
 def echo_nest_update():
     """
-    Updates the json with all EchoNest data available for this song
-    ('Echo Nest API Error 5: bucket - Invalid parameter:
-    bucket "id" is not one of "audio", "biographies", "blogs", "doc_counts",
-    "familiarity", "familiarity_rank", "genre", "hotttnesss",
-    "hotttnesss_rank", "discovery", "discovery_rank", "images",
-    "artist_location", "news", "reviews", "songs", "terms", "urls", "video",
-    "years_active", "id:7digital-US", "id:7digital-AU", "id:7digital-UK",
-    "id:facebook", "id:fma", "id:emi_bluenote", "id:emi_artists",
-    "id:twitter", "id:spotify-WW", "id:seatwave",
-    "id:lyricfind-US", "id:jambase", "id:musixmatch-WW", "id:rdio-US",
-    "id:rdio-AT", "id:rdio-AU", "id:rdio-BR", "id:rdio-CA", "id:rdio-CH",
-    "id:rdio-DE", "id:rdio-DK", "id:rdio-ES", "id:rdio-FI", "id:rdio-FR",
-    "id:rdio-IE", "id:rdio-IT", "id:rdio-NL", "id:rdio-NO", "id:rdio-NZ",
-    "id:rdio-PT", "id:rdio-SE", "id:emi_electrospective", "id:rdio-EE",
-    "id:rdio-LT", "id:rdio-LV", "id:rdio-IS", "id:rdio-BE", "id:rdio-MX",
-    "id:seatgeek", "id:rdio-GB", "id:rdio-CZ", "id:rdio-CO", "id:rdio-PL",
-    "id:rdio-MY", "id:rdio-HK", "id:rdio-CL", "id:twitter_numeric",
-    "id:7digital-ES", "id:openaura", "id:spotify", "id:spotify-WW",
-    "id:tumblr", or "id:<CATALOG ID>"
-    """
-
+    Updates the json with all EchoNest data available for this song """
     from pyechonest import config
     config.ECHO_NEST_API_KEY = ECHO_NEST_API_KEY
     config.CALL_TIMEOUT = 60
