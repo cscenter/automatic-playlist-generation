@@ -16,7 +16,7 @@ def flatten_dataset(json_data):
         result['id3_genre'] = id3_data.get('genre', None)
         result['id3_genre2'] = id3_data.get('genre2', None)
         result['id3_lyrics'] = id3_data.get('lyrics', None)
-        # result['id3_length'] = id3_data.get('length', None)
+        result['id3_length'] = id3_data.get('length', None)
         # result['id3_track_number'] = id3_data.get('track number', None)
         # result['id3_composer'] = id3_data.get('composer', None)
         # result['id3_text_writer'] = id3_data.get('text_writer', None)
@@ -91,11 +91,19 @@ def flatten_dataset(json_data):
         """
     return result
 
+FORMAT_DESCRIPTOR = "#EXTM3U"
+RECORD_MARKER = "#EXTINF"
+
 dp = HardDriveProvider('music')
 dataset = {}
 for song_path in dp.data:
     dataset[song_path] = flatten_dataset(dp.get_by_id(song_path))
-    if 'echo_analysis' in dataset[song_path]:
-        print('HERE')
-seed_song = dp.get_by_id(random.choice(list(dataset.keys())))
-print(seed_song)
+all_tracks = list(dataset.keys())
+seed_song = dp.get_by_id(random.choice(all_tracks))
+with open('result.m3u', 'w') as fp:
+    fp.write(FORMAT_DESCRIPTOR + "\n")
+    for _ in range(1, 15):
+        track_length = audio.info.length / 1000
+        fp.write(RECORD_MARKER + ":" + str(track_length) + "," +
+                 artist + " - " + title + "\n")
+        fp.write(track + "\n")
