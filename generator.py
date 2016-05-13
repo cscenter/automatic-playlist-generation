@@ -1,3 +1,4 @@
+import random
 from collections import defaultdict
 from DataSetCreator.dataproviders import HardDriveProvider
 
@@ -62,8 +63,39 @@ def flatten_dataset(json_data):
         result['echo_analysis'] = echo_data.get('analysis', None)
         result['echo_basic_list'] = echo_data.get('basic_song_list', None)
         result['echo_basic_list'] = echo_data.get('basic_artist_list', None)
+        """
+        'acousticness' (617595596592) = {float} 0.052235
+'analysis_url' (617595596720) = {str} 'http://echonest-analysis.s3.amazonaws.com/TR/gxKjmQF8a0Ew2ZnElpzYAJQFYMx84un3Jq6bTWxKyKmFJRif5pBaedbnYJCmgS7obOcPXoHSXQ8a6d7Dc%3D/3/full.json?AWSAccessKeyId=AKIAJRDFEY23UEVW42BQ&Expires=1461799538&Signature=/GaF%2BABJrcsoQA/2M93Nl2cUXGE%3D'
+'audio_md5' (617595596464) = {str} ''
+'danceability' (617595625520) = {float} 0.16377
+'duration' (617595596400) = {float} 360.68
+'energy' (617595609472) = {float} 0.792323
+'instrumentalness' (617595606840) = {float} 0.001548
+'key' (617595609640) = {int} 1
+'liveness' (617595596656) = {float} 0.043472
+'loudness' (617595596528) = {float} -4.281
+'mode' (617595609584) = {int} 0
+'speechiness' (617595596272) = {float} 0.045882
+'tempo' (617595609528) = {float} 172.737
+'time_signature' (617595596336) = {int} 3
+'valence' (617595609696) = {float} 0.319538
+
+'audio' (617595609920) = {int} 24
+'biographies' (617595626800) = {int} 12
+'blogs' (617595609752) = {int} 8092
+'images' (617595609864) = {int} 271
+'news' (617595609416) = {int} 3056
+'reviews' (617586743312) = {int} 153
+'songs' (617595609976) = {int} 219
+'video' (617595609808) = {int} 839
+        """
     return result
 
 dp = HardDriveProvider('music')
+dataset = {}
 for song_path in dp.data:
-    song = flatten_dataset(dp.get_by_id(song_path))
+    dataset[song_path] = flatten_dataset(dp.get_by_id(song_path))
+    if 'echo_analysis' in dataset[song_path]:
+        print('HERE')
+seed_song = dp.get_by_id(random.choice(list(dataset.keys())))
+print(seed_song)
