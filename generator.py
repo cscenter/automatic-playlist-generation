@@ -54,7 +54,16 @@ def flatten_dataset(json_data):
         result['echo_artist'] = echo_data.get('artist', None)
         # result['echo_bios'] = echo_data.get('bios', None)
         # result['echo_blogs'] = echo_data.get('blogs', None)
-        result['echo_doc_counts'] = echo_data.get('doc_counts', None)
+        dc = echo_data.get('doc_counts', None)
+        if dc:
+            result['echo_audio_counts'] = dc['audio']
+            result['echo_bio_counts'] = dc['biographies']
+            result['echo_blogs_counts'] = dc['blogs']
+            result['echo_images_counts'] = dc['images']
+            result['echo_news_counts'] = dc['news']
+            result['echo_reviews_counts'] = dc['reviews']
+            result['echo_songs_counts'] = dc['songs']
+            result['echo_video_counts'] = dc['video']
         result['echo_a_familiarity'] = echo_data.get('a_familiarity', None)
         result['echo_a_hotttnesss'] = echo_data.get('a_hotttnesss', None)
         # result['echo_news'] = echo_data.get('news', None)
@@ -62,38 +71,28 @@ def flatten_dataset(json_data):
         # result['echo_urls'] = echo_data.get('urls', None)
         # result['echo_years_active'] = echo_data.get('years_active', None)
         result['echo_similar'] = echo_data.get('similar', None)
-        result['echo_summary'] = echo_data.get('summary', None)
+        ds = echo_data.get('summary', None)
+        if ds:
+            result['echo_summary_acousticness'] = ds['acousticness']
+            # result['echo_summary_analysis_url'] = ds['analysis_url']
+            # result['echo_summary_audio_md5'] = ds['audio_md5']
+            result['echo_summary_danceability'] = ds['danceability']
+            result['echo_summary_duration'] = ds['duration']
+            result['echo_summary_energy'] = ds['energy']
+            result['echo_summary_instrumentalness'] = ds['instrumentalness']
+            # result['echo_summary_key'] = ds['key']
+            result['echo_summary_liveness'] = ds['liveness']
+            result['echo_summary_loudness'] = ds['loudness']
+            # result['echo_summary_mode'] = ds['mode']
+            result['echo_summary_speechiness'] = ds['speechiness']
+            result['echo_summary_tempo'] = ds['tempo']
+            # result['echo_summary_time_signature'] = ds['time_signature']
+            result['echo_summary_valence'] = ds['valence']
         result['echo_s_hotttnesss'] = echo_data.get('s_hotttnesss', None)
         result['echo_s_discovery'] = echo_data.get('s_discovery', None)
         result['echo_analysis'] = echo_data.get('analysis', None)
         result['echo_basic_list'] = echo_data.get('basic_song_list', None)
-        result['echo_basic_list'] = echo_data.get('basic_artist_list', None)
-        """
-        'acousticness' (617595596592) = {float} 0.052235
-'analysis_url' (617595596720) = {str} 'http://echonest-analysis.s3.amazonaws.com/TR/gxKjmQF8a0Ew2ZnElpzYAJQFYMx84un3Jq6bTWxKyKmFJRif5pBaedbnYJCmgS7obOcPXoHSXQ8a6d7Dc%3D/3/full.json?AWSAccessKeyId=AKIAJRDFEY23UEVW42BQ&Expires=1461799538&Signature=/GaF%2BABJrcsoQA/2M93Nl2cUXGE%3D'
-'audio_md5' (617595596464) = {str} ''
-'danceability' (617595625520) = {float} 0.16377
-'duration' (617595596400) = {float} 360.68
-'energy' (617595609472) = {float} 0.792323
-'instrumentalness' (617595606840) = {float} 0.001548
-'key' (617595609640) = {int} 1
-'liveness' (617595596656) = {float} 0.043472
-'loudness' (617595596528) = {float} -4.281
-'mode' (617595609584) = {int} 0
-'speechiness' (617595596272) = {float} 0.045882
-'tempo' (617595609528) = {float} 172.737
-'time_signature' (617595596336) = {int} 3
-'valence' (617595609696) = {float} 0.319538
-
-'audio' (617595609920) = {int} 24
-'biographies' (617595626800) = {int} 12
-'blogs' (617595609752) = {int} 8092
-'images' (617595609864) = {int} 271
-'news' (617595609416) = {int} 3056
-'reviews' (617586743312) = {int} 153
-'songs' (617595609976) = {int} 219
-'video' (617595609808) = {int} 839
-        """
+        result['echo_artist_list'] = echo_data.get('basic_artist_list', None)
     return result
 
 FORMAT_DESCRIPTOR = "#EXTM3U"
