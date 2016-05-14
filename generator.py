@@ -1,6 +1,10 @@
+import os
 import random
 from collections import defaultdict
 from DataSetCreator.dataproviders import HardDriveProvider
+from mutagen import MutagenError
+from mutagen.mp3 import MP3
+from mutagen.mp4 import MP4
 
 
 def flatten_dataset(json_data):
@@ -100,10 +104,25 @@ for song_path in dp.data:
     dataset[song_path] = flatten_dataset(dp.get_by_id(song_path))
 all_tracks = list(dataset.keys())
 seed_song = dp.get_by_id(random.choice(all_tracks))
+selected = set(seed_song)
 with open('result.m3u', 'w') as fp:
     fp.write(FORMAT_DESCRIPTOR + "\n")
-    for _ in range(1, 15):
+    for _ in range(15):
+        audio = None
+        track = seed_song['song_path']
+        try:
+            audio = MP3(track)
+        except MutagenError:
+            audio = MP4(track)
         track_length = audio.info.length / 1000
-        fp.write(RECORD_MARKER + ":" + str(track_length) + "," +
-                 artist + " - " + title + "\n")
+        artist = seed_song.get('last_artist', seed_song.get('id3_artist', ''))
+        title = seed_song.get('last_track', seed_song.get('id3_title', ''))
+        if artist and title:
+            fp.write("{}:{},{} - {}\n".format(
+                RECORD_MARKER, track_length, artist, title))
+        else:
+            fp.write("{}:{},{} - {}\n".format(
+                RECORD_MARKER, track_length, os.path.basename(track)[:-4]))
         fp.write(track + "\n")
+        while seed_song in selected:
+            seed_song = dp.get_by_id(random.choice(all_tracks))
