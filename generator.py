@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import random
 from collections import defaultdict
@@ -93,6 +94,52 @@ def flatten_dataset(json_data):
         result['echo_analysis'] = echo_data.get('analysis', None)
         result['echo_basic_list'] = echo_data.get('basic_song_list', None)
         result['echo_artist_list'] = echo_data.get('basic_artist_list', None)
+    for k in ['last_artist', 'last_artistsimilar', 'last_artisttags',
+              'last_album', 'last_albumlisteners', 'last_albumplaycount',
+              'last_albumtags', 'last_track', 'last_tracklisteners',
+              'last_trackplaycount', 'last_tracktags', 'last_tracksimilar',
+              'last_tracksimtags', 'id3_title', 'id3_album',
+              'id3_artist', 'id3_artist2', 'id3_artist3', 'id3_artist4',
+              'id3_genre', 'id3_genre2', 'id3_lyrics', 'id3_length',
+              'echo_artist_id', 'echo_artist',
+              'echo_audio_counts', 'echo_bio_counts',
+              'echo_blogs_counts', 'echo_images_counts', 'echo_news_counts',
+              'echo_reviews_counts', 'echo_songs_counts', 'echo_video_counts',
+              'echo_a_familiarity', 'echo_a_hotttnesss', 'echo_similar',
+              'echo_summary_acousticness', 'echo_summary_danceability',
+              'echo_summary_duration', 'echo_summary_energy',
+              'echo_summary_instrumentalness', 'echo_summary_liveness',
+              'echo_summary_loudness', 'echo_summary_speechiness',
+              'echo_summary_tempo', 'echo_summary_valence',
+              'echo_s_hotttnesss', 'echo_s_discovery', 'echo_analysis',
+              'echo_basic_list', 'echo_artist_list']:
+        if k not in result:
+            result[k] = None
+    return result
+
+
+def convert_json(js):
+    result = np.array(list(v if v is not None and
+                           not isinstance(v, list) and
+                           not isinstance(v, str)
+                           else 0
+                           for k, v in js.items()))
+    return result
+
+
+def get_distance(k, l):
+    return np.linalg.norm(k - l)
+
+
+def get_distance_matrix(source):
+    result = dict()
+    for k in source:
+        ck = convert_json(source[k])
+        for l in source:
+            cl = convert_json(source[l])
+            dist = get_distance(ck, cl)
+            result[(k, l)] = dist
+            result[(l, k)] = dist
     return result
 
 FORMAT_DESCRIPTOR = "#EXTM3U"
@@ -102,6 +149,7 @@ dp = HardDriveProvider('music')
 dataset = {}
 for song_path in dp.data:
     dataset[song_path] = flatten_dataset(dp.get_by_id(song_path))
+dm = get_distance_matrix(dataset)
 all_tracks = list(dataset.keys())
 seed_song = dataset[random.choice(all_tracks)]
 selected = set()
@@ -110,7 +158,6 @@ with open('result.m3u', 'w') as fp:
     fp.write(FORMAT_DESCRIPTOR + "\n")
     for _ in range(15):
         audio = None
-        track_length = -1
         track = seed_song['path']
         try:
             audio = MP3(track)
