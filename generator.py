@@ -118,7 +118,7 @@ def flatten_dataset(json_data):
     return result
 
 
-def convert_json(js):
+def num_convert_json(js):
     result = np.array(list(v if v is not None and
                            not isinstance(v, list) and
                            not isinstance(v, str)
@@ -132,12 +132,10 @@ def get_distance(k, l):
 
 
 def get_distance_matrix(source):
-    result = dict()
+    result = {}
     for k in source:
-        ck = convert_json(source[k])
         for l in source:
-            cl = convert_json(source[l])
-            dist = get_distance(ck, cl)
+            dist = get_distance(source[k], source[l])
             result[(k, l)] = dist
             result[(l, k)] = dist
     return result
@@ -147,9 +145,11 @@ RECORD_MARKER = "#EXTINF"
 
 dp = HardDriveProvider('music')
 dataset = {}
+numeric = {}
 for song_path in dp.data:
     dataset[song_path] = flatten_dataset(dp.get_by_id(song_path))
-dm = get_distance_matrix(dataset)
+    numeric[song_path] = num_convert_json(dataset[song_path])
+dm = get_distance_matrix(numeric)
 all_tracks = list(dataset.keys())
 seed_song = dataset[random.choice(all_tracks)]
 selected = set()
