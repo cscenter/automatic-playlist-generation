@@ -1,5 +1,7 @@
+import json
 import numpy as np
 import os
+import os.path
 import random
 from collections import defaultdict
 from DataSetCreator.dataproviders import HardDriveProvider
@@ -149,30 +151,53 @@ numeric = {}
 for song_path in dp.data:
     dataset[song_path] = flatten_dataset(dp.get_by_id(song_path))
     numeric[song_path] = num_convert_json(dataset[song_path])
-dm = get_distance_matrix(numeric)
+dm = None
+if os.path.isfile('dm.txt'):
+    try:
+        with open('dm.txt', 'r') as fp:
+            dm = json.load(fp)
+    except json.decoder.JSONDecodeError:
+        pass
+if not dm:
+    dm = get_distance_matrix(numeric)
+    try:
+        with open('dm.txt', 'w') as fp:
+            json.dump(dm, fp)
+    except TypeError:
+        pass
 all_tracks = list(dataset.keys())
 seed_song = dataset[random.choice(all_tracks)]
 selected = set()
 selected.add(seed_song['path'])
+distances = []
 with open('result.m3u', 'w') as fp:
     fp.write(FORMAT_DESCRIPTOR + "\n")
-    for _ in range(15):
+    while len(selected) < 15:
         audio = None
         track = seed_song['path']
         try:
             audio = MP3(track)
         except MutagenError:
             audio = MP4(track)
-        track_length = audio.info.length
-        artist = seed_song.get('last_artist', seed_song.get('id3_artist', ''))
-        title = seed_song.get('last_track', seed_song.get('id3_title', ''))
-        if artist and title:
-            fp.write("{}:{},{} - {}\n".format(
-                RECORD_MARKER, track_length, artist, title))
-        else:
-            fp.write("{}:{},{} - {}\n".format(
-                RECORD_MARKER, track_length, os.path.basename(track)[:-4]))
-        fp.write(track + "\n")
+        except MutagenError:
+            selected.remove(track)
+        if audio:
+            track_length = audio.info.length
+            artist = seed_song.get('last_artist',
+                                   seed_song.get('id3_artist', ''))
+            title = seed_song.get('last_track',
+                                  seed_song.get('id3_title', ''))
+            if artist and title:
+                fp.write("{}:{},{} - {}\n".format(
+                    RECORD_MARKER, track_length, artist, title))
+            else:
+                fp.write("{}:{},{} - {}\n".format(
+                    RECORD_MARKER,
+                    track_length,
+                    os.path.basename(track)[:-4]))
+            fp.write(track + "\n")
         while seed_song['path'] in selected:
             seed_song = dataset[random.choice(all_tracks)]
+        distances.append(dm[(track, seed_song['path'])])
         selected.add(seed_song['path'])
+print(distances)
