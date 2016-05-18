@@ -134,12 +134,12 @@ def get_distance(k, l):
 
 
 def get_distance_matrix(source):
-    result = {}
+    result = defaultdict(lambda: {})
     for k in source:
         for l in source:
             dist = get_distance(source[k], source[l])
-            result[(k, l)] = dist
-            result[(l, k)] = dist
+            result[k][l] = dist
+            result[l][k] = dist
     return result
 
 FORMAT_DESCRIPTOR = "#EXTM3U"
@@ -170,6 +170,33 @@ seed_song = dataset[random.choice(all_tracks)]
 selected = set()
 selected.add(seed_song['path'])
 distances = []
+
+
+def get_distribution(current):
+    result = {}
+    dists = dm[current]
+    total = sum(dists.values())
+    start = 0
+    for s in dists:
+        if s != current:
+            d_s = 1 / (dists[s] * total)
+            result[s] = (start, start + d_s)
+            start += d_s
+        assert start < 1
+    return result
+
+
+def get_next_song(current):
+    while current in selected:
+        distrib = get_distribution(current)
+        r = random.random()
+        for k, v in distrib.items():
+            if v[0] <= r < v[1]:
+                current = k
+                break
+    return dataset[current]
+
+
 with open('result.m3u', 'w') as fp:
     fp.write(FORMAT_DESCRIPTOR + "\n")
     while len(selected) < 15:
@@ -197,7 +224,7 @@ with open('result.m3u', 'w') as fp:
                     os.path.basename(track)[:-4]))
             fp.write(track + "\n")
         while seed_song['path'] in selected:
-            seed_song = dataset[random.choice(all_tracks)]
+            seed_song = get_next_song(track)
         distances.append(dm[(track, seed_song['path'])])
         selected.add(seed_song['path'])
 print(distances)
