@@ -130,7 +130,7 @@ def num_convert_json(js):
 
 
 def get_distance(k, l):
-    return np.linalg.norm(k - l)
+    return 1 / np.linalg.norm(k - l)
 
 
 def get_distance_matrix(source):
@@ -179,7 +179,7 @@ def get_distribution(current):
     start = 0
     for s in dists:
         if s != current:
-            d_s = 1 / (dists[s] * total)
+            d_s = dists[s] / total
             result[s] = (start, start + d_s)
             start += d_s
         assert start < 1
