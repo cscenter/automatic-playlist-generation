@@ -5,6 +5,7 @@ import os.path
 import random
 from collections import defaultdict
 from DataSetCreator.dataproviders import HardDriveProvider
+from json.decoder import JSONDecodeError
 from mutagen import MutagenError
 from mutagen.mp3 import MP3
 from mutagen.mp4 import MP4
@@ -154,15 +155,15 @@ for song_path in dp.data:
 dm = None
 if os.path.isfile('dm.txt'):
     try:
-        with open('dm.txt', 'r') as fp:
-            dm = json.load(fp)
-    except json.decoder.JSONDecodeError:
+        with open('dm.txt', 'r') as df:
+            dm = json.load(df)
+    except JSONDecodeError:
         pass
 if not dm:
     dm = get_distance_matrix(numeric)
     try:
-        with open('dm.txt', 'w') as fp:
-            json.dump(dm, fp)
+        with open('dm.txt', 'w') as df:
+            json.dump(dm, df)
     except TypeError:
         pass
 all_tracks = list(dataset.keys())
@@ -182,17 +183,6 @@ def get_distribution(current):
     return result
 
 
-def get_next_song(current):
-    while current in selected:
-        distrib = get_distribution(current)
-        r = random.random()
-        for k, v in distrib.items():
-            if v[0] <= r < v[1]:
-                current = k
-                break
-    return dataset[current]
-
-
 def create_random_playlist():
     seed_song = dataset[random.choice(all_tracks)]
     selected = set()
@@ -206,9 +196,10 @@ def create_random_playlist():
             try:
                 audio = MP3(track)
             except MutagenError:
-                audio = MP4(track)
-            except MutagenError:
-                selected.remove(track)
+                try:
+                    audio = MP4(track)
+                except MutagenError:
+                    selected.remove(track)
             if audio:
                 track_length = audio.info.length
                 artist = seed_song.get('last_artist',
@@ -230,12 +221,22 @@ def create_random_playlist():
     print(distances)
 
 
-
 def create_playlist_by_distance():
     seed_song = dataset[random.choice(all_tracks)]
     selected = set()
     selected.add(seed_song['path'])
     distances = []
+
+    def get_next_song(current):
+        while current in selected:
+            distrib = get_distribution(current)
+            r = random.random()
+            for k, v in distrib.items():
+                if v[0] <= r < v[1]:
+                    current = k
+                    break
+        return dataset[current]
+
     with open('result_dist.m3u', 'w') as fp:
         fp.write(FORMAT_DESCRIPTOR + "\n")
         while len(selected) < 15:
@@ -244,9 +245,10 @@ def create_playlist_by_distance():
             try:
                 audio = MP3(track)
             except MutagenError:
-                audio = MP4(track)
-            except MutagenError:
-                selected.remove(track)
+                try:
+                    audio = MP4(track)
+                except MutagenError:
+                    selected.remove(track)
             if audio:
                 track_length = audio.info.length
                 artist = seed_song.get('last_artist',
