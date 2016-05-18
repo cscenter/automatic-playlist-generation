@@ -166,10 +166,6 @@ if not dm:
     except TypeError:
         pass
 all_tracks = list(dataset.keys())
-seed_song = dataset[random.choice(all_tracks)]
-selected = set()
-selected.add(seed_song['path'])
-distances = []
 
 
 def get_distribution(current):
@@ -197,34 +193,77 @@ def get_next_song(current):
     return dataset[current]
 
 
-with open('result.m3u', 'w') as fp:
-    fp.write(FORMAT_DESCRIPTOR + "\n")
-    while len(selected) < 15:
-        audio = None
-        track = seed_song['path']
-        try:
-            audio = MP3(track)
-        except MutagenError:
-            audio = MP4(track)
-        except MutagenError:
-            selected.remove(track)
-        if audio:
-            track_length = audio.info.length
-            artist = seed_song.get('last_artist',
-                                   seed_song.get('id3_artist', ''))
-            title = seed_song.get('last_track',
-                                  seed_song.get('id3_title', ''))
-            if artist and title:
-                fp.write("{}:{},{} - {}\n".format(
-                    RECORD_MARKER, track_length, artist, title))
-            else:
-                fp.write("{}:{},{} - {}\n".format(
-                    RECORD_MARKER,
-                    track_length,
-                    os.path.basename(track)[:-4]))
-            fp.write(track + "\n")
-        while seed_song['path'] in selected:
-            seed_song = get_next_song(track)
-        distances.append(dm[(track, seed_song['path'])])
-        selected.add(seed_song['path'])
-print(distances)
+def create_random_playlist():
+    seed_song = dataset[random.choice(all_tracks)]
+    selected = set()
+    selected.add(seed_song['path'])
+    distances = []
+    with open('result.m3u', 'w') as fp:
+        fp.write(FORMAT_DESCRIPTOR + "\n")
+        while len(selected) < 15:
+            audio = None
+            track = seed_song['path']
+            try:
+                audio = MP3(track)
+            except MutagenError:
+                audio = MP4(track)
+            except MutagenError:
+                selected.remove(track)
+            if audio:
+                track_length = audio.info.length
+                artist = seed_song.get('last_artist',
+                                       seed_song.get('id3_artist', ''))
+                title = seed_song.get('last_track',
+                                      seed_song.get('id3_title', ''))
+                if artist and title:
+                    fp.write("{}:{},{} - {}\n".format(
+                        RECORD_MARKER, track_length, artist, title))
+                else:
+                    fp.write("{}:{},{} - {}\n".format(
+                        RECORD_MARKER, track_length,
+                        os.path.basename(track)[:-4]))
+                fp.write(track + "\n")
+            while seed_song['path'] in selected:
+                seed_song = dataset[random.choice(all_tracks)]
+            distances.append(dm[(track, seed_song['path'])])
+            selected.add(seed_song['path'])
+    print(distances)
+
+
+
+def create_playlist_by_distance():
+    seed_song = dataset[random.choice(all_tracks)]
+    selected = set()
+    selected.add(seed_song['path'])
+    distances = []
+    with open('result_dist.m3u', 'w') as fp:
+        fp.write(FORMAT_DESCRIPTOR + "\n")
+        while len(selected) < 15:
+            audio = None
+            track = seed_song['path']
+            try:
+                audio = MP3(track)
+            except MutagenError:
+                audio = MP4(track)
+            except MutagenError:
+                selected.remove(track)
+            if audio:
+                track_length = audio.info.length
+                artist = seed_song.get('last_artist',
+                                       seed_song.get('id3_artist', ''))
+                title = seed_song.get('last_track',
+                                      seed_song.get('id3_title', ''))
+                if artist and title:
+                    fp.write("{}:{},{} - {}\n".format(
+                        RECORD_MARKER, track_length, artist, title))
+                else:
+                    fp.write("{}:{},{} - {}\n".format(
+                        RECORD_MARKER,
+                        track_length,
+                        os.path.basename(track)[:-4]))
+                fp.write(track + "\n")
+            while seed_song['path'] in selected:
+                seed_song = get_next_song(track)
+            distances.append(dm[(track, seed_song['path'])])
+            selected.add(seed_song['path'])
+    print(distances)
