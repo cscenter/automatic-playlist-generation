@@ -84,10 +84,10 @@ def flatten_dataset(json_data):
             result['echo_summary_duration'] = ds['duration']
             result['echo_summary_energy'] = ds['energy']
             result['echo_summary_instrumentalness'] = ds['instrumentalness']
-            # result['echo_summary_key'] = ds['key']
+            result['echo_summary_key'] = ds['key']
             result['echo_summary_liveness'] = ds['liveness']
             result['echo_summary_loudness'] = ds['loudness']
-            # result['echo_summary_mode'] = ds['mode']
+            result['echo_summary_mode'] = ds['mode']
             result['echo_summary_speechiness'] = ds['speechiness']
             result['echo_summary_tempo'] = ds['tempo']
             # result['echo_summary_time_signature'] = ds['time_signature']
@@ -114,6 +114,7 @@ def flatten_dataset(json_data):
               'echo_summary_instrumentalness', 'echo_summary_liveness',
               'echo_summary_loudness', 'echo_summary_speechiness',
               'echo_summary_tempo', 'echo_summary_valence',
+              'echo_summary_key', 'echo_summary_mode',
               'echo_s_hotttnesss', 'echo_s_discovery', 'echo_analysis',
               'echo_basic_list', 'echo_artist_list']:
         if k not in result:
@@ -152,20 +153,8 @@ numeric = {}
 for song_path in dp.data:
     dataset[song_path] = flatten_dataset(dp.get_by_id(song_path))
     numeric[song_path] = num_convert_json(dataset[song_path])
-dm = None
-if os.path.isfile('dm.txt'):
-    try:
-        with open('dm.txt', 'r') as df:
-            dm = json.load(df)
-    except JSONDecodeError:
-        pass
-if not dm:
-    dm = get_distance_matrix(numeric)
-    try:
-        with open('dm.txt', 'w') as df:
-            json.dump(dm, df)
-    except TypeError:
-        pass
+
+dm = get_distance_matrix(numeric)
 all_tracks = list(dataset.keys())
 
 
@@ -188,7 +177,7 @@ def create_random_playlist():
     selected = set()
     selected.add(seed_song['path'])
     distances = []
-    with open('result.m3u', 'w') as fp:
+    with open('result_random.m3u', 'w') as fp:
         fp.write(FORMAT_DESCRIPTOR + "\n")
         while len(selected) < 15:
             audio = None
@@ -269,3 +258,6 @@ def create_playlist_by_distance():
             distances.append(dm[(track, seed_song['path'])])
             selected.add(seed_song['path'])
     print(distances)
+
+create_random_playlist()
+create_playlist_by_distance()

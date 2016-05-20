@@ -8,3 +8,4 @@ DataSetCreator/______Music_2/
 DataSetCreator/music/
 TagAnalyzer/__pycache__/
 *.tsv
+music/
