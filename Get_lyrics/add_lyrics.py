@@ -1,9 +1,9 @@
 import json
-from get_lyrics import get_lyrics_wikia
+from get_lyrics import get_lyrics_wikia, get_lyrics_metro
 import time
 
 
-path = "/mnt/hdd3/music/music.json"
+path = "music.json"
 no_lyr = "T [["
 
 
@@ -19,16 +19,20 @@ for key in data:
             artist_name =  id["artist"]
             title_name = id["title"]
 
-            if id["lyrics"] != "":
+            if id["lyrics"] == "":
 
                 lyr = get_lyrics_wikia(title_name, artist_name, 1)
 
                 if (lyr[0:4] != no_lyr) and (lyr[0:4] != no_lyr.lower()) :
                     id["lyrics"] = lyr
 
+                else:
+                    lyr2 = get_lyrics_metro(title_name, artist_name, 1)
+                    if lyr2 != "":
+                        id["lyrics"] = lyr2
                     
                        
-                with open(path, "w") as data_w:
+                with open(path, 'w') as data_w:
                     data_w.write(json.dumps(data))
 
 
