@@ -39,14 +39,14 @@ def flatten_dataset(json_data):
         # result['last_artistwikisumm'] =
         #   last_data.get('artistwikisumm', None)
         result['last_album'] = last_data.get('album', None)
-        result['last_albumlisteners'] = last_data.get('albumlisteners', None)
-        result['last_albumplaycount'] = last_data.get('albumplaycount', None)
+        # result['last_albumlisteners'] = last_data.get('albumlisteners', None)
+        # result['last_albumplaycount'] = last_data.get('albumplaycount', None)
         result['last_albumtags'] = last_data.get('albumtags', None)
         # result['last_artistwiki'] = last_data.get('artistwiki', None)
         # result['last_albumwikisumm'] = last_data.get('albumwikisumm', None)
         result['last_track'] = last_data.get('track', None)
-        result['last_tracklisteners'] = last_data.get('tracklisteners', None)
-        result['last_trackplaycount'] = last_data.get('trackplaycount', None)
+        # result['last_tracklisteners'] = last_data.get('tracklisteners', None)
+        # result['last_trackplaycount'] = last_data.get('trackplaycount', None)
         result['last_tracktags'] = last_data.get('tracktags', None)
         result['last_tracksimilar'] = last_data.get('tracksimilar', None)
         # result['last_trackwiki'] = last_data.get('trackwiki', None)
@@ -59,15 +59,15 @@ def flatten_dataset(json_data):
         # result['echo_bios'] = echo_data.get('bios', None)
         # result['echo_blogs'] = echo_data.get('blogs', None)
         dc = echo_data.get('doc_counts', None)
-        if dc:
-            result['echo_audio_counts'] = dc['audio']
-            result['echo_bio_counts'] = dc['biographies']
-            result['echo_blogs_counts'] = dc['blogs']
-            result['echo_images_counts'] = dc['images']
-            result['echo_news_counts'] = dc['news']
-            result['echo_reviews_counts'] = dc['reviews']
-            result['echo_songs_counts'] = dc['songs']
-            result['echo_video_counts'] = dc['video']
+        # if dc:
+        #     result['echo_audio_counts'] = dc['audio']
+        #     result['echo_bio_counts'] = dc['biographies']
+        #     result['echo_blogs_counts'] = dc['blogs']
+        #     result['echo_images_counts'] = dc['images']
+        #     result['echo_news_counts'] = dc['news']
+        #     result['echo_reviews_counts'] = dc['reviews']
+        #     result['echo_songs_counts'] = dc['songs']
+        #     result['echo_video_counts'] = dc['video']
         result['echo_a_familiarity'] = echo_data.get('a_familiarity', None)
         result['echo_a_hotttnesss'] = echo_data.get('a_hotttnesss', None)
         # result['echo_news'] = echo_data.get('news', None)
@@ -132,7 +132,10 @@ def num_convert_json(js):
 
 
 def get_distance(k, l):
-    return 1 / np.linalg.norm(k - l)
+    d = np.linalg.norm(k - l)
+    if not d:
+        return 0
+    return 1 / d
 
 
 def get_distance_matrix(source):
@@ -168,7 +171,8 @@ def get_distribution(current):
             d_s = dists[s] / total
             result[s] = (start, start + d_s)
             start += d_s
-        assert start < 1
+        if start >= 1:
+            break
     return result
 
 
@@ -238,6 +242,7 @@ def create_playlist_by_distance():
                     audio = MP4(track)
                 except MutagenError:
                     selected.remove(track)
+                    seed_song = get_next_song(track)
             if audio:
                 track_length = audio.info.length
                 artist = seed_song.get('last_artist',
@@ -255,9 +260,9 @@ def create_playlist_by_distance():
                 fp.write(track + "\n")
             while seed_song['path'] in selected:
                 seed_song = get_next_song(track)
-            distances.append(dm[(track, seed_song['path'])])
+            distances.append(dm[track][seed_song['path']])
             selected.add(seed_song['path'])
     print(distances)
 
-create_random_playlist()
+# create_random_playlist()
 create_playlist_by_distance()
