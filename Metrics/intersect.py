@@ -1,135 +1,92 @@
-import json
-import time
-import urllib.request
-from urllib.parse import quote
-
-import pylast
-
-LAST_FM_USER = ""
-LAST_FM_PASSWORD = ""
-LAST_FM_API_KEY = ""
-LAST_FM_API_SECRET = ""
-
-username = LAST_FM_USER
-password_hash = pylast.md5(LAST_FM_PASSWORD)
-network = pylast.LastFMNetwork(api_key=LAST_FM_API_KEY, api_secret=LAST_FM_API_SECRET, username=username,
-                               password_hash=password_hash)
-
-path_before_artist = 'http://ws.audioscrobbler.com/2.0/?method=artist.getcorrection&artist='
-
-path_after_artist = '&api_key=API_KEY&format=json'
-
-path_track_1 = 'http://ws.audioscrobbler.com/2.0/?method=track.getcorrection&artist='
-
-path_track_2 = '&track='
-
-path_track_3 = '&api_key=API_KEY&format=json'
+from scipy import spatial
+from correction import *
+from lastfm_tags import *
 
 
-# def intersect_tags(artist_1, artist_2):
+def intersect_track_tags(artist_1, title_1, artist_2, title_2, correction = 1):
 
-def intersect_tags(artist_1, artist_2):
-    artist_1_corr = correct_artist(artist_1)
+    if correction:
+        artist_1 = correct_artist(artist_1)
+        artist_2 = correct_artist(artist_2)
+        title_1 = correct_title(artist_1_corr, title_1)
+        title_2 = correct_title(artist_2_corr, title_2)   
 
-    artist_2_corr = correct_artist(artist_2)
+    tags_1 = track_tags(artist_1, title_1)
+    tags_2 = track_tags(artist_2, title_2)
 
-    tags_1 = artist_tags(artist_1_corr)
+    tags = set()
+    tags.update(tags_1.keys())
+        
+    for key in tags_2: 
+        tags.add(key)
+    
+    l_t = len(tags)
 
-    tags_2 = artist_tags(artist_2_corr)
+    vector_1 = [0]*l_t
+    vector_2 = [0]*l_t
 
+    i = 0
+    
+    for tag in tags:
+        try:
+            vector_1[i] = int(tags_1[tag])
 
-    tags = []
-    tags.append(tags_1.keys())
-    tags.append(tags_2.keys())
+        except:
+            vector_1[i] = 0
+            
+        try:
+            vector_2[i] = int(tags_2[tag])
 
-    print(tags)
+        except:
+            vector_2[i] = 0
 
+        i += 1
 
+    res = 1 - spatial.distance.cosine(vector_1, vector_2)
 
-
-
-def correct_artist(artist):
-    tmp_json = 'tmp_track.json'
-
-    url_artist = path_before_artist + quote(artist) + path_after_artist
-
-    try:
-
-        urllib.request.urlretrieve(url_artist, tmp_json)
-
-        with open(tmp_json) as corr_json:
-            corr = json.load(corr_json)
-
-        corr_data = corr['corrections']['correction']['artist']
-
-        if 'name' in corr_data:
-            artist_corr = corr_data['name']
-
-        corr_json.close()
-
-
-    except:
-        print("error for:", artist)
-
-        time.sleep(0.25)
-
-    return artist_corr
+    return res
 
 
-def correct_title(artist, title):
-    tmp_json = 'tmp_track.json'
+    
 
-    url_name = path_track_1 + quote(artist) + path_track_2 + quote(title) + path_track_3
+def intersect_artist_tags(artist_1, artist_2, correction = 1):
+    if correction:
+        artist_1 = correct_artist(artist_1)
+        artist_2 = correct_artist(artist_2)
 
-    try:
+    tags_1 = artist_tags(artist_1)
+    tags_2 = artist_tags(artist_2)
 
-        urllib.request.urlretrieve(url_name, tmp_json)
+    tags = set()
+    tags.update(tags_1.keys())
+        
+    for key in tags_2:  
+        tags.add(key)
+    
+    l_t = len(tags)
 
-        with open(tmp_json) as corr_json:
-            corr = json.load(corr_json)
-
-            corr_data = corr['corrections']['correction']['track']
-
-            if 'name' in corr_data:
-                title_corr = corr_data['name']
-
-            corr_json.close()
-    except:
-        print("error for:", artist, "-", title)
-
-    time.sleep(0.25)
+    vector_1 = [0]*l_t
+    vector_2 = [0]*l_t
 
 
-    return title_corr
+    i = 0
+    for tag in tags:
+        try:
+            vector_1[i] = int(tags_1[tag])
 
+        except:
+            vector_1[i] = 0
+            
+        try:
+            vector_2[i] = int(tags_2[tag])
 
-def artist_tags(artist):
-    tag_dict = {}
+        except:
+            vector_2[i] = 0
 
-    try:
-        artist_data = network.get_artist(artist)
-        tag = [t[0].get_name() for t in artist_data.get_top_tags()]
-        cnt = [t[1] for t in artist_data.get_top_tags()]
-        tag_dict = dict(zip(tag, cnt))
-    except:
-        print("No tags for artist:", artist)
+        i += 1
 
-    time.sleep(0.25)
+    res = 1 - spatial.distance.cosine(vector_1, vector_2)
 
-    return tag_dict
+    return res
+ 
 
-
-def track_tags(artist, title):
-    tag_dict = {}
-
-    try:
-        track_data = network.get_track(artist, title)
-        tag = [t[0].get_name() for t in track_data.get_top_tags()]
-        cnt = [t[1] for t in track_data.get_top_tags()]
-        tag_dict = dict(zip(tag, cnt))
-    except:
-        print("No tags for track:", artist, "-", title)
-
-    time.sleep(0.25)
-
-    return tag_dict
