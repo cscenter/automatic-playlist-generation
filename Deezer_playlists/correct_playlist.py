@@ -5,13 +5,13 @@ from urllib.parse import quote
 import fileinput
 
 path_before_artist = 'http://ws.audioscrobbler.com/2.0/?method=artist.getcorrection&artist='
-path_after_artist = '&api_key=API_KEY&format=json'
+path_after_artist = '&api_key=8c6726b0d09be11902f257f3f8341c99&format=json'
 
 path_track_1 = 'http://ws.audioscrobbler.com/2.0/?method=track.getcorrection&artist='
 path_track_2 = '&track='
-path_track_3 = '&api_key=API_KEY&format=json'
+path_track_3 = '&api_key=8c6726b0d09be11902f257f3f8341c99&format=json'
 
-path = '/mnt/hdd3/small.txt'
+path = '/mnt/hdd3/1_5M.txt'
 
 tmp_json = 'tmp.json'
 
@@ -140,7 +140,7 @@ def correct_pl(line):
 
 
             track_corr = correct_title(artist_corr, title)
-            if (track_corr == ""):
+            if ((track_corr == "") and (i not in del_list)):
                 del_list.append(i)
             else:
                 track["track_title"] = track_corr
@@ -162,16 +162,18 @@ def correct_pl(line):
     return lines_tsv
 
 
-path_out = '/mnt/hdd3/small_corr.txt'
+path_out = '/mnt/hdd3/1_5M_corr.txt'
 
 f_out = open(path_out, 'w')
 
 with fileinput.input(files = path) as f:
     for line in f:
+        #if (fileinput.lineno() < 825):
+        #    continue
         new_lines = correct_pl(line)
         l_n = len(new_lines)
         for i in range(l_n):
             f_out.write(new_lines[i])
             f_out.write('\n')
 
-        # print(fileinput.lineno())
+        print(fileinput.lineno())
