@@ -13,15 +13,13 @@ def cooccurrence(tag):                         # без учёта числа в
         if tag in d:
             cooc_tags.extend(list(d.keys()))
 
-    print(cooc_tags)
-
     cnt = Counter(cooc_tags)
 
     print("usage of tag:", tag, ":", cnt[tag])
 
     del cnt[tag]
 
-    print(tag, "occurs with:", cnt)
+    print(tag, "occurs with:", cnt.mpst_common(10))
 
 
 
@@ -38,15 +36,13 @@ def cooccurrence_count(tag):                     # с учётом числа в
                     cooc_tags[key] = d[key]
 
 
-    print(cooc_tags)
-
     print("usage of tag:", tag, ":", cooc_tags[tag])
 
     del cooc_tags[tag]
 
     cooc_sorted = sorted(cooc_tags.items(), key=lambda x:(-x[1], x[0]))
 
-    print(tag, "occurs with:", cooc_sorted)
+    print(tag, "occurs with:", cooc_sorted[:10])
 
 
 
