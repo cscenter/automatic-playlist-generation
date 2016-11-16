@@ -58,7 +58,7 @@ def get_playlist_tracks(user_id, playlist_id):           # треки из пл�
 
 
 
-def get_playlists_ids(file_input):           # id плейлистов из выдачи по категории или ключевому слову
+def get_playlists_ids(file_input):           # id и владелец плейлистов из файла выдачи по категории или ключевому слову
 
     playlists = []
     data_pl = json.load(open(file_input))
@@ -67,19 +67,50 @@ def get_playlists_ids(file_input):           # id плейлистов из вы
     l_i = len(items)
 
     for i in range(l_i):
-        tmp_list = []
-
-        tmp_list.append(items[i]["owner"]["id"])
-        tmp_list.append(items[i]["id"])
-
-        playlists.append(tmp_list)
+        playlists.append([items[i]["owner"]["id"], items[i]["id"]])
 
     return playlists
 
 
-pl_list = get_playlists_ids("jazz.json")
 
-l = len(pl_list)
+def get_playlists_by_query(query):       # id и владелец плейлистов по запросу -- выдача всех
 
-for i in range(l):
-    get_playlist_tracks(pl_list[i][0], pl_list[i][1])
+    playlists = []
+
+    search_pl = sp.search(q = query, type = "playlist", limit = 50, offset = 0)
+    total = search_pl["playlists"]["total"]
+    items = search_pl["playlists"]["items"]
+
+
+    offset = 0
+
+    if (total > 50):
+
+        iterations = total // 50
+
+        for i in range(iterations):
+            search_pl = sp.search(q = query, type = "playlist", limit = 50, offset = offset)
+            items = search_pl["playlists"]["items"]
+
+            for j in range(50):
+                playlists.append([items[j]["owner"]["id"], items[j]["id"]])
+
+            offset += 50
+            time.sleep(0.1)
+
+
+        if (total % 50):
+            last_total = total - offset
+            search_pl = sp.search(q = query, type = "playlist", limit = 50, offset = offset)
+            items = search_pl["playlists"]["items"]
+
+            for j in range(last_total):
+                playlists.append([items[j]["owner"]["id"], items[j]["id"]])
+
+    else:
+        for j in range(total):
+            playlists.append([items[i]["owner"]["id"], items[j]["id"]])
+
+
+    return playlists
+
