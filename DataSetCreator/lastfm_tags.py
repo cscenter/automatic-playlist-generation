@@ -71,8 +71,6 @@ def track_similar(artist, title):
     except:
         print("No similar for track:", artist, "-", title)
 
-    print(track_dicts)
-
     time.sleep(0.201)
     return track_dicts
 
