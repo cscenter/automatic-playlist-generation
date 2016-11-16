@@ -21,7 +21,7 @@ def track_tags(artist, title):
     try:
         track_data = network.get_track(artist, title)
         tag = [t[0].get_name() for t in track_data.get_top_tags()]
-        cnt = [t[1] for t in track_data.get_top_tags()]
+        cnt = [int(t[1]) for t in track_data.get_top_tags()]
         tag_dict = dict(zip(tag, cnt))
     except:
         print("No tags for track:", artist, "-", title)
@@ -39,7 +39,7 @@ def artist_tags(artist):
     try:
         artist_data = network.get_artist(artist)
         tag = [t[0].get_name() for t in artist_data.get_top_tags()]
-        cnt = [t[1] for t in artist_data.get_top_tags()]
+        cnt = [int(t[1]) for t in artist_data.get_top_tags()]
         tag_dict = dict(zip(tag, cnt))
     except:
         print("No tags for", artist)
