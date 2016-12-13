@@ -1,4 +1,6 @@
 import json
+import os
+import fileinput
 
 # всё к нижнему регистру, суммировать вхождения, но чтобы не более 100
 def tag_lowering(tag_dict):  # на вход --словарь тегов с подсчётом использований
@@ -150,7 +152,7 @@ tag_list = ["00s", "10s", "20s", "30s", "40s", "50s", "60s", "70s", "80s", "90s"
             "metal", "heavy metal", "thrash metal", "metalcore", "progressive metal",
             "black metal", "alternative metal", "nu metal", "power metal", "doom metal", "melodic metal", "gothic metal",
             "progressive rock", "progressive", "experimental", "psychedelic", "art rock", "glam rock", "hard rock",
-            "classic rock", "soft rock", "punk", "punk rock", "post-punk", "hardcore punk", "ska pank", "ska",
+            "classic rock", "soft rock", "punk", "punk rock", "post-punk", "hardcore punk", "ska punk", "ska",
             "rockabilly", "rock and roll", "latin", "reggae", "acoustic",
             "classical", "piano", "guitar", "chanson", "emo", "celtic", "mpb"
             ]
@@ -173,7 +175,7 @@ tag_list_enlarged = ["00s", "10s", "20s", "30s", "40s", "50s", "60s", "70s", "80
                      "metal", "heavy metal", "thrash metal", "metalcore", "progressive metal",
                      "black metal", "alternative metal", "nu metal", "power metal", "doom metal", "melodic metal", "gothic metal",
                      "progressive rock", "progressive", "experimental", "psychedelic", "art rock", "glam rock", "hard rock",
-                     "classic rock", "soft rock", "punk", "punk rock", "post-punk", "hardcore punk", "ska pank", "ska",
+                     "classic rock", "soft rock", "punk", "punk rock", "post-punk", "hardcore punk", "ska punk", "ska",
                      "rockabilly", "rock and roll", "latin", "reggae", "acoustic",
                      "classical", "piano", "guitar", "chanson", "emo", "celtic", "mpb",
                      "bluesrock", "blues-rock", "rhythm & blues", "r&b", "r and b", "funky",
@@ -251,7 +253,6 @@ def tag_reduce(tag_dict):  # на вход --словарь тегов с под
 
 
 
-
 def tag_merge(tag_dict):   # уже reduced теги по расширенному массиву
 
     new_dict = {}
@@ -307,116 +308,59 @@ def tag_vector(tag_dict):   # уже reduced теги -- только те, чт
 
 
 
+# отличие test set от train set в том, что train set должен идти в том порядке, в каком плейлисты (повторы могут быть)
 
-def test_set(file_in, file_out1, file_out2):   # пока только теги треков
 
-    # сопоставить треки номерам и записать это в файл
-    data = json.load(open(file_in))
+# на вход всегда файл, где построчно artist<tab>title<tab>index, индекс равен номеру строки
+# для train set файл с повторами, уже всё разложено по плейлистами
+# на выходе -- массив векторов встречаемости тегов
+# audio_features отдельно, потом их склеить
 
-    idx = 0
-    f_out1 = open(file_out1, "w")              # номера треков
-    f_out2 = open(file_out2, "w")              # массив векторов, соотв. отобранным признакам. порядок согласован с номерами треков
+
+def lastfm_vect(file_in1, file_in2, file_out):
+
+    track_list = open(file_in1)
+
+    data = json.load(open(file_in2))
+
     big_list = []
 
-    for artist in data:
-        tracks = data[artist]
-        l_t = len(tracks)
+    for line in track_list:
+        tab_sep = line.split("\t")
+        artist = tab_sep[0]
+        title = tab_sep[1]
 
-        for i in range(l_t):
+        l = len(tag_list)
 
-            track = tracks[i]
-            title = list(track.keys())[0]
-            tmp_line = str(idx) + "\t" + artist + "\t" + title + "\n"
-            f_out1.write(tmp_line)             # номера в файле
-            idx += 1
+        vect = [0]*l
 
-            tags = track[title]
+        if artist in data:
 
-            t1 = tag_lowering(tags)
-            t2 = tag_epoch(t1)
-            t3 = tag_gender(t2)
-            t4 = tag_reduce(t3)
-            t5 = tag_merge(t4)
-            t6 = tag_vector(t5)
+            tracks = data[artist]
+            l_t = len(tracks)
 
-            big_list.append(t6)
+            for i in range(l_t):
 
-    with open(file_out2, "w") as f_out2:
-        json.dump(big_list, f_out2)
+                track = tracks[i]
+                title_i = list(track.keys())[0]
 
-    return
+                if (title == title_i):
 
+                    tags = track[title_i]
 
+                    t1 = tag_lowering(tags)
+                    t2 = tag_epoch(t1)
+                    t3 = tag_gender(t2)
+                    t4 = tag_reduce(t3)
+                    t5 = tag_merge(t4)
+                    vect = tag_vector(t5)
 
-def train_set_to_vect(file_in, file_out):   # пока только теги треков
-
-    # вывод в виде словаря, чтобы было быстрее сопоставлять с номерами плейлистов
-    data = json.load(open(file_in))
-
-
-    for artist in data:
-        tracks = data[artist]
-        l_t = len(tracks)
-
-        for i in range(l_t):
-
-            track = tracks[i]
-            title = list(track.keys())[0]
-
-            tags = track[title]
-
-
-            t1 = tag_lowering(tags)
-            t2 = tag_epoch(t1)
-            t3 = tag_gender(t2)
-            t4 = tag_reduce(t3)
-            t5 = tag_merge(t4)
-            t6 = tag_vector(t5)
-
-            track[title] = t6
+        big_list.append(vect)
 
 
     with open(file_out, "w") as f_out:
-        json.dump(data, f_out)
+        json.dump(big_list, f_out)
 
     return
 
-
-
-
-def train_set(file_pl, file_vect, file_out):
-
-    # file_pl -- построчно p_id<tab>artist<tab>title
-    # file_vect -- словарь artist:[track1:tags, track2:tags], где tags -- численные векторы
-
-    pl = open(file_pl)
-
-    vect_dict = json.load(open(file_vect))
-
-    f_out = open(file_out, "w")
-    line_dict = {}
-
-    for line in pl:
-        line_dict = {}
-        tab_sep = line.split('\t')
-        p_id = tab_sep[0]
-        artist = tab_sep[1]
-        title = tab_sep[2].split('\n')[0]
-
-        if artist in vect_dict:
-            tracks = vect_dict[artist]
-            l_t = len(tracks)
-
-
-
-            for i in range(l_t):
-                tmp_title = list(tracks[i].keys())[0]
-                vect = tracks[i][tmp_title]
-            if ((title == tmp_title) and (sum(vect) > 0)):
-                line_dict[p_id] = vect
-                json.dump(line_dict, f_out)
-                f_out.write("\n")
-
-
-    return
 
