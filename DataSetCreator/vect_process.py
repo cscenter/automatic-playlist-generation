@@ -56,7 +56,7 @@ def combine(file_in1, file_in2, file_out, idx_out):
             vect2 = data2[i]
             if ((sum(vect1) > 0) and (sum(vect2) > 0)):
                 vect1.extend(vect2)
-                print(vect1)
+
                 new_list.append(vect1)
                 ids.write(str(i))
                 ids.write("\n")
