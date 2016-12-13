@@ -44,10 +44,10 @@ def combine(file_in1, file_in2, file_out, idx_out):
     ids = open(idx_out, "w")
 
     new_list = []
-
+    l_d = len(data1)
     if (len(data1) != len(data2)):
         print("check files")
-        l_d = len(data1)
+
 
     else:
 
